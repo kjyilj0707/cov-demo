@@ -84,7 +84,7 @@ function Queue({
     <Card aria-labelledby={id}>
       <h2 id={id} className="flex items-center gap-2 text-base font-bold">
         {title}
-        <span className={`rounded-full px-2 py-0.5 text-xs ${deals.length ? "bg-accent text-white" : "bg-line text-ink-2"}`}>
+        <span className={`rounded-full px-2 py-0.5 text-xs ${deals.length ? "bg-accent text-on-accent" : "bg-line text-ink-2"}`}>
           {deals.length}
         </span>
       </h2>

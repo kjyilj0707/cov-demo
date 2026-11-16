@@ -1,16 +1,25 @@
 @import "tailwindcss";
 
-/* CoV 랜딩페이지 토큰 그대로 */
+/*
+ * 색은 이 블록의 토큰으로만 쓴다. 화면 코드에는 색 값(#..., rgb, white/black)을 직접 쓰지 않는다.
+ * 테마를 바꿀 때는 아래 값만 고치면 된다. (예외: src/app/icon.svg, layout.tsx의 themeColor는
+ * CSS 변수를 읽지 못해 값이 따로 적혀 있다.)
+ */
 :root {
-  --paper: #fafaf8;
-  --ink: #1c1c1e;
-  --accent: #2b4fd8;
-  --ink-2: #4a4a50;
-  --ink-3: #8a8a91;
-  --line: #e4e4e0;
-  --card: #ffffff;
+  /* 기준: CoV 로고(2026-11). 거의 검정 + 로고 'o'의 파랑 + 흰 배경 + 회색 보조글 */
+  --paper: #ffffff; /* 화면 배경 */
+  --card: #ffffff; /* 카드 배경(테두리로 구분) */
+  --muted: #f4f4f6; /* 카드 안 회색 칸, 키워드 알약 */
+  --ink: #1c1c1e; /* 로고 글자색 */
+  --ink-2: #69686d; /* 로고 태그라인 회색: 보조글 */
+  --ink-3: #9a99a0; /* 입력칸 안내 글자(placeholder) 전용. 본문 글자에는 쓰지 않는다(대비 부족) */
+  --line: #e6e6ea;
+  --accent: #2b4fd8; /* 로고 'o' 파랑 */
   --accent-soft: #eef1fc;
-  /* 아래 상태 색은 랜딩 토큰에 없어 시연판에서 추가한 값(디자인 확정 필요) */
+  /* accent·ink 배경 위에 올리는 글자색 */
+  --on-accent: #ffffff;
+  --on-ink: #ffffff;
+  /* 아래 상태 색은 로고·랜딩 토큰에 없어 시연판에서 추가한 값(디자인 확정 필요) */
   --ok: #1f7a4d;
   --ok-soft: #e8f5ee;
   --warn: #8a5a00;
@@ -27,7 +36,10 @@
   --color-ink-3: var(--ink-3);
   --color-line: var(--line);
   --color-card: var(--card);
+  --color-muted: var(--muted);
   --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
+  --color-on-ink: var(--on-ink);
   --color-ok: var(--ok);
   --color-ok-soft: var(--ok-soft);
   --color-warn: var(--warn);
@@ -61,6 +73,6 @@ body {
     display: none !important;
   }
   body {
-    background: #fff;
+    background: var(--card);
   }
 }

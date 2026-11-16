@@ -41,8 +41,8 @@ function DealView() {
       <div className="py-16 text-center">
         <h1 className="text-lg font-bold">거래를 찾을 수 없습니다</h1>
         <p className="mt-2 text-sm text-ink-2">시연 데이터를 초기화했다면 목록에서 다시 골라 주세요.</p>
-        <Link href="/" className="mt-4 inline-block font-semibold text-accent underline">
-          홈으로
+        <Link href="/deals/" className="mt-4 inline-block font-semibold text-accent underline">
+          거래 목록으로
         </Link>
       </div>
     );
@@ -52,8 +52,8 @@ function DealView() {
 
   return (
     <div className="space-y-4">
-      <Link href="/" className="text-sm font-semibold text-ink-2 hover:text-ink">
-        ← 내 거래
+      <Link href="/deals/" className="text-sm font-semibold text-ink-2 hover:text-ink">
+        ← {role === "operator" ? "전체 거래" : "나의 거래"}
       </Link>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
@@ -270,7 +270,7 @@ function TermsCard({ deal }: { deal: Deal }) {
           계약 정보
         </h2>
         {deal.agreement ? (
-          <span className="rounded-full bg-ink px-2.5 py-1 text-xs font-semibold text-white">조건 잠김</span>
+          <span className="rounded-full bg-ink px-2.5 py-1 text-xs font-semibold text-on-ink">조건 잠김</span>
         ) : deal.status === "proposed" ? (
           <span className="rounded-full bg-accent-soft px-2.5 py-1 text-xs font-semibold text-accent">동의 전 · 수정 가능</span>
         ) : null}
@@ -295,7 +295,7 @@ function TermsCard({ deal }: { deal: Deal }) {
       </dl>
 
       {deal.agreement && (
-        <div className="mt-3 space-y-2 rounded-xl bg-paper p-3 text-[13px]">
+        <div className="mt-3 space-y-2 rounded-xl bg-muted p-3 text-[13px]">
           <p>
             <span className="text-ink-2">계약 성립(양측 동의) </span>
             <strong>{formatDateTime(deal.agreement.agreedAt)}</strong>
@@ -361,7 +361,7 @@ function PaymentCard({ deal, role }: { deal: Deal; role: Role }) {
         </div>
       )}
       {direct && (deal.status === "awaiting_deposit" || deal.status === "deposit_reported") && (
-        <p className="mt-3 rounded-xl bg-paper p-3 text-sm">
+        <p className="mt-3 rounded-xl bg-muted p-3 text-sm">
           의뢰인이 작업자에게 직접 송금합니다. 작업자 계좌는 CoV가 받지 않으며(MVP 범위 밖), 양측이 따로 주고받습니다.
         </p>
       )}
@@ -449,7 +449,7 @@ function HistoryList({ deal }: { deal: Deal }) {
         </summary>
         <ol className="mt-3 space-y-3">
           {[...deal.history].reverse().map((h, i) => (
-            <li key={i} className="rounded-xl bg-paper p-3 text-[13px]">
+            <li key={i} className="rounded-xl bg-muted p-3 text-[13px]">
               <p className="font-semibold">
                 {h.from ? `${STATUS_NAME(h.from, deal)} → ` : ""}
                 {STATUS_NAME(h.to, deal)}

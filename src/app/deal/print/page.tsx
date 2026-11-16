@@ -29,8 +29,8 @@ function PrintView() {
     return (
       <p className="py-16 text-center text-ink-2">
         계약이 성립한 거래만 요약을 볼 수 있습니다.{" "}
-        <Link href="/" className="font-semibold text-accent underline">
-          홈으로
+        <Link href="/deals/" className="font-semibold text-accent underline">
+          거래 목록으로
         </Link>
       </p>
     );

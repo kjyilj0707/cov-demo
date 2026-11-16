@@ -8,7 +8,6 @@ export const OPERATOR_NAME = "CoV 운영자(시연)";
 
 /** 새 계약을 만들 때 고를 수 있는 상대 */
 export const CLIENT_CHOICES: Party[] = [ME_CLIENT, OTHER_CLIENT];
-export const WORKER_CHOICES: Party[] = [ME_WORKER];
 
 export const ROLE_PERSONA: Record<Role, { title: string; name: string; hint: string }> = {
   worker: { title: "작업자", name: ME_WORKER.name, hint: "믹싱·디자인 외주를 받는 쪽" },

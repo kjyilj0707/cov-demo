@@ -157,7 +157,7 @@ export const inputCls =
   "w-full rounded-xl border border-line bg-card px-3 py-2.5 text-[15px] text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none focus-visible:outline-3 focus-visible:outline-accent";
 
 export const btnPrimary =
-  "inline-flex min-h-11 items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-[15px] font-bold text-white disabled:opacity-50";
+  "inline-flex min-h-11 items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-[15px] font-bold text-on-accent disabled:opacity-50";
 export const btnSecondary =
   "inline-flex min-h-11 items-center justify-center rounded-xl border border-line bg-card px-4 py-2.5 text-[15px] font-bold text-ink disabled:opacity-50";
 export const btnDanger =

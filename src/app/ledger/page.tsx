@@ -26,7 +26,7 @@ export default function LedgerPage() {
       <div className="overflow-x-auto rounded-2xl border border-line bg-card" tabIndex={0} role="region" aria-label="대금 장부 표(가로로 스크롤)">
         <table className="w-full min-w-[720px] border-collapse text-[13px]">
           <caption className="sr-only">대금 장부</caption>
-          <thead className="bg-paper text-left text-ink-2">
+          <thead className="bg-muted text-left text-ink-2">
             <tr>
               {["거래", "금액", "입금자명", "입금 확인일", "지급일", "대금 경로", "상태"].map((h) => (
                 <th key={h} scope="col" className="whitespace-nowrap border-b border-line px-3 py-2 font-semibold">

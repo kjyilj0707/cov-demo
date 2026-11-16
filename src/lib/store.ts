@@ -99,7 +99,15 @@ export function act(dealId: string, action: Action): ActResult {
   if (!state) return { ok: false, message: "아직 불러오는 중입니다." };
   const deal = state.deals.find((d) => d.id === dealId);
   if (!deal) return { ok: false, message: "거래를 찾을 수 없습니다." };
-  const r = transition(deal, action, actorFor(state.role), demoNow());
+  // 역할 버튼은 "이 거래의 그 쪽 당사자"를 연기한다. 이력에 남는 이름도 거래 당사자 이름으로 맞춘다.
+  // (검색에서 고른 다른 창작자와 만든 거래도 작업자 역할로 이어서 진행할 수 있게)
+  const actor =
+    state.role === "worker"
+      ? { role: "worker" as const, name: deal.worker.name }
+      : state.role === "client"
+        ? { role: "client" as const, name: deal.client.name }
+        : actorFor(state.role);
+  const r = transition(deal, action, actor, demoNow());
   if (!r.ok) return { ok: false, message: r.message };
   set({ ...state, deals: state.deals.map((d) => (d.id === dealId ? r.deal : d)) });
   return { ok: true };

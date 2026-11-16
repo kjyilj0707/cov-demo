@@ -1,0 +1,55 @@
+import { describe, expect, it } from "vitest";
+import { CATEGORIES, CREATORS, findProfileTarget, searchCreators } from "./creators";
+import { ME_CLIENT, ME_WORKER } from "./personas";
+
+describe("creators 정적 데이터", () => {
+  it("id가 겹치지 않고, 모든 카테고리 id가 실제로 있다", () => {
+    const ids = CREATORS.map((c) => c.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    const catIds = new Set(CATEGORIES.map((c) => c.id));
+    for (const c of CREATORS) for (const k of c.categories) expect(catIds.has(k)).toBe(true);
+  });
+
+  it("카테고리마다 창작자가 한 명 이상 있다", () => {
+    for (const k of CATEGORIES) expect(searchCreators("", k.id).length).toBeGreaterThan(0);
+  });
+});
+
+describe("searchCreators", () => {
+  it("빈 검색이면 전부", () => {
+    expect(searchCreators("", null)).toHaveLength(CREATORS.length);
+  });
+
+  it("키워드로 거른다(띄어쓰기·대소문자 무시)", () => {
+    const r = searchCreators("뮤직 비디오", null);
+    expect(r.map((c) => c.id)).toContain("w-neujeunohu");
+    expect(r.every((c) => c.categories.includes("video") || c.keywords.join().includes("뮤직비디오"))).toBe(true);
+  });
+
+  it("카테고리 이름으로도 찾는다", () => {
+    expect(searchCreators("미디어아트", null).map((c) => c.id)).toEqual(["w-byeolgaru"]);
+  });
+
+  it("키워드와 카테고리를 함께 쓰면 둘 다 맞아야 한다", () => {
+    expect(searchCreators("포스터", "artwork").map((c) => c.id)).toEqual(["w-guruemdari"]);
+  });
+
+  it("맞는 게 없으면 빈 목록", () => {
+    expect(searchCreators("없는검색어xyz", null)).toEqual([]);
+  });
+});
+
+describe("findProfileTarget", () => {
+  it("창작자는 작업자, 시연 의뢰인은 의뢰인으로 연다", () => {
+    expect(findProfileTarget(ME_WORKER.id)?.side).toBe("worker");
+    expect(findProfileTarget(ME_CLIENT.id)?.side).toBe("client");
+    expect(findProfileTarget("nope")).toBeUndefined();
+  });
+});
+
+describe("POPULAR_KEYWORDS", () => {
+  it("인기 키워드는 모두 결과가 한 명 이상 나온다", async () => {
+    const { POPULAR_KEYWORDS } = await import("./creators");
+    for (const k of POPULAR_KEYWORDS) expect(searchCreators(k, null).length, k).toBeGreaterThan(0);
+  });
+});

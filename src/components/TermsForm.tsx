@@ -148,7 +148,7 @@ export function TermsForm({
               >
                 <input
                   type="checkbox"
-                  className="size-4 accent-[#2B4FD8]"
+                  className="size-4 accent-accent"
                   checked={on}
                   onChange={() =>
                     up("fileFormats", on ? t.fileFormats.filter((x) => x !== f) : [...t.fileFormats, f])
@@ -194,7 +194,7 @@ export function TermsForm({
                 value={v}
                 checked={t.paymentRoute === v}
                 onChange={() => up("paymentRoute", v)}
-                className="mt-1 size-4 accent-[#2B4FD8]"
+                className="mt-1 size-4 accent-accent"
               />
               <span>
                 <span className="block text-sm font-bold">
