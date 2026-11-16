@@ -129,7 +129,7 @@ function DealView() {
           </div>
         </div>
 
-        <aside aria-label="지금 상황과 할 일" className="contents lg:sticky lg:top-24 lg:block lg:space-y-4">
+        <aside aria-label="지금 상황과 할 일" className="contents lg:sticky lg:top-36 lg:block lg:space-y-4">
           <div className="order-1">
             <NowBox deal={deal} role={role} now={now} />
           </div>

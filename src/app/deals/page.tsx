@@ -39,7 +39,7 @@ export default function MyDealsPage() {
       </div>
 
       <div className="space-y-4 lg:grid lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start lg:gap-8 lg:space-y-0">
-        <div className="space-y-4 lg:sticky lg:top-24">
+        <div className="space-y-4 lg:sticky lg:top-36">
           <Card aria-labelledby="sum-title">
             <h2 id="sum-title" className="text-[13px] font-medium text-ink-2">
               {amountLabel}

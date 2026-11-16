@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { CreatorCard } from "@/components/CreatorCard";
 import { TERMINAL } from "@/lib/deal-machine";
@@ -26,6 +26,18 @@ function HomeView() {
   const demo = useDemo();
   const [query, setQuery] = useState(params.get("q") ?? "");
   const [cat, setCat] = useState<string | null>(params.get("cat"));
+  const wantFocus = params.get("focus") === "search";
+  const ready = demo !== null;
+
+  // 컴퓨터 헤더의 검색 버튼으로 다른 화면에서 왔을 때(?focus=search) 검색창에 포커스하고 주소에서 표시를 지운다.
+  useEffect(() => {
+    if (!wantFocus || !ready) return;
+    const q = document.getElementById("q");
+    q?.focus();
+    q?.scrollIntoView({ block: "center" });
+    router.replace(pathname, { scroll: false });
+  }, [wantFocus, ready, router, pathname]);
+
   if (!demo) return null;
 
   // 주소에 검색 상태를 남겨, 프로필에서 돌아왔을 때 결과가 그대로 보이게 한다.

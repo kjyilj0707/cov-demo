@@ -133,7 +133,7 @@ function TermsPreview({
     ["대금 경로", PAYMENT_ROUTE_LABEL[terms.paymentRoute]],
   ];
   return (
-    <aside aria-labelledby="preview-title" className="hidden lg:sticky lg:top-24 lg:block">
+    <aside aria-labelledby="preview-title" className="hidden lg:sticky lg:top-36 lg:block">
       <Card>
         <h2 id="preview-title" className="text-base font-bold">
           보낼 조건 미리보기

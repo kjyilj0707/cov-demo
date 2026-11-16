@@ -285,7 +285,7 @@ function ProfileBody({
 function TwoCol({ left, right }: { left: React.ReactNode; right: React.ReactNode }) {
   return (
     <div className="space-y-4 lg:grid lg:grid-cols-[380px_minmax(0,1fr)] lg:items-start lg:gap-8 lg:space-y-0">
-      <div className="space-y-4 lg:sticky lg:top-24">{left}</div>
+      <div className="space-y-4 lg:sticky lg:top-36">{left}</div>
       <div className="space-y-4">{right}</div>
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { AUTO_APPROVE_DAYS } from "@/lib/deal-machine";
 import { formatDateTime } from "@/lib/format";
@@ -40,6 +40,18 @@ function TabIcon({ name }: { name: IconName }) {
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const demo = useDemo();
   const pathname = usePathname();
+  const router = useRouter();
+
+  /** 헤더 검색 버튼: 홈이면 검색창에 바로 포커스, 다른 화면이면 홈으로 가서 포커스(?focus=search). */
+  function goSearch() {
+    if (pathname === "/") {
+      const q = document.getElementById("q");
+      q?.focus();
+      q?.scrollIntoView({ block: "center" });
+    } else {
+      router.push("/?focus=search");
+    }
+  }
   const [toolsOpen, setToolsOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [notice, setNotice] = useState("");
@@ -80,37 +92,88 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </div>
 
       <header className="no-print sticky top-0 z-30 border-b border-line bg-paper/95 backdrop-blur">
-        <div className={`${WRAP} flex flex-wrap items-center gap-x-3 gap-y-2 pb-3 pt-3 lg:flex-nowrap lg:gap-x-4 xl:gap-x-6`}>
+        {/* 컴퓨터(lg~): 위 얇은 유틸 줄 + 큰 로고·큰 메뉴 줄 */}
+        <div className="hidden lg:block">
+          <div className={`${WRAP} flex h-9 items-center justify-end gap-5 text-[13px] text-ink-2`}>
+            <button
+              type="button"
+              onClick={() => {
+                setToolsOpen((v) => !v);
+                setLoginOpen(false);
+              }}
+              aria-expanded={toolsOpen}
+              aria-controls="demo-tools"
+              className="hover:text-ink hover:underline"
+            >
+              시연 도구
+            </button>
+            <RoleSwitch role={role} disabled={!demo} name="role-desktop" compact />
+            <button
+              type="button"
+              onClick={() => {
+                setLoginOpen((v) => !v);
+                setToolsOpen(false);
+              }}
+              aria-expanded={loginOpen}
+              aria-controls="login-note"
+              className="hover:text-ink hover:underline"
+            >
+              로그인
+            </button>
+          </div>
+          <div className={`${WRAP} flex h-20 items-center justify-between gap-8`}>
+            <Link href="/" aria-label="CoV 시연판 홈" className="flex shrink-0 items-center gap-3">
+              <span aria-hidden="true" className="text-[40px] font-black leading-none tracking-tight text-ink">
+                C<span className="text-accent">o</span>V
+              </span>
+              <span className="rounded-full bg-muted px-2.5 py-0.5 text-[12px] font-semibold text-ink-2">시연판</span>
+            </Link>
+            <div className="flex items-center gap-8 xl:gap-10">
+              <nav aria-label="주요 메뉴">
+                <ul className="flex items-center gap-7 xl:gap-9">
+                  {tabs.map((t) => {
+                    const on = isActive(t);
+                    return (
+                      <li key={t.href}>
+                        <Link
+                          href={t.href}
+                          aria-current={on ? "page" : undefined}
+                          className={`inline-flex min-h-11 items-center whitespace-nowrap text-[20px] text-ink hover:underline hover:underline-offset-8 ${
+                            on ? "font-extrabold" : "font-normal"
+                          }`}
+                        >
+                          {t.label}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </nav>
+              <button
+                type="button"
+                aria-label="창작자 검색"
+                onClick={goSearch}
+                className="inline-flex size-11 items-center justify-center rounded-full text-ink hover:bg-muted"
+              >
+                <svg aria-hidden="true" viewBox="0 0 24 24" className="size-7" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+                  <path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* 휴대폰·태블릿(~1023px): 기존 두 줄 헤더 */}
+        <div className={`${WRAP} flex flex-wrap items-center gap-x-3 gap-y-2 pb-3 pt-3 lg:hidden`}>
           <Link href="/" aria-label="CoV 시연판 홈" className="order-1 flex shrink-0 items-center gap-2">
             <span aria-hidden="true" className="text-[22px] font-black leading-none tracking-tight text-ink">
               C<span className="text-accent">o</span>V
             </span>
             <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-ink-2">시연판</span>
           </Link>
-          <nav aria-label="주요 메뉴" className="order-2 hidden min-w-0 flex-1 lg:block">
-            <ul className="flex items-center gap-1">
-              {tabs.map((t) => {
-                const on = isActive(t);
-                return (
-                  <li key={t.href}>
-                    <Link
-                      href={t.href}
-                      aria-current={on ? "page" : undefined}
-                      className={`inline-flex min-h-10 items-center whitespace-nowrap rounded-full px-2.5 text-[14px] font-semibold xl:px-3.5 xl:text-[15px] ${
-                        on ? "bg-accent-soft text-accent" : "text-ink-2 hover:bg-muted hover:text-ink"
-                      }`}
-                    >
-                      {t.label}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
+          <RoleSwitch role={role} disabled={!demo} name="role" />
 
-          <RoleSwitch role={role} disabled={!demo} />
-
-          <div className="order-3 ml-auto flex shrink-0 items-center gap-2 lg:order-4 lg:ml-0">
+          <div className="order-3 ml-auto flex shrink-0 items-center gap-2">
             <button
               type="button"
               onClick={() => {
@@ -230,12 +293,58 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** 역할 전환. 휴대폰: 헤더 두 번째 줄 전체 폭. 데스크톱: 헤더 한 줄 안의 작은 버튼 묶음(이름은 화면 낭독기용으로만). */
-function RoleSwitch({ role, disabled }: { role: Role; disabled: boolean }) {
+/** 역할 전환. 휴대폰·태블릿: 헤더 두 번째 줄 전체 폭. 컴퓨터: 유틸 줄의 작은 알약(compact, 이름은 화면 낭독기용으로만). */
+function RoleSwitch({
+  role,
+  disabled,
+  name,
+  compact = false,
+}: {
+  role: Role;
+  disabled: boolean;
+  /** 휴대폰용과 컴퓨터용이 한 문서에 같이 있어서 라디오 묶음 이름을 따로 둔다 */
+  name: string;
+  /** 컴퓨터 유틸 줄용 작은 모양 */
+  compact?: boolean;
+}) {
+  if (compact) {
+    return (
+      <fieldset className="shrink-0">
+        <legend className="sr-only">보는 역할 바꾸기</legend>
+        <div className="flex items-center gap-0.5 rounded-full bg-muted p-0.5">
+          {ROLES.map((r) => {
+            const p = ROLE_PERSONA[r];
+            const checked = role === r;
+            return (
+              <label
+                key={r}
+                title={`${p.title} · ${p.name}`}
+                className={`cursor-pointer whitespace-nowrap rounded-full px-2.5 py-0.5 text-[12px] leading-5 has-[:focus-visible]:outline has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-accent ${
+                  checked ? "bg-card font-semibold text-ink shadow-sm" : "text-ink-2 hover:text-ink"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name={name}
+                  value={r}
+                  checked={checked}
+                  onChange={() => setRole(r)}
+                  className="sr-only"
+                  disabled={disabled}
+                />
+                {p.title}
+                <span className="sr-only"> {p.name}</span>
+              </label>
+            );
+          })}
+        </div>
+      </fieldset>
+    );
+  }
   return (
-    <fieldset className="order-4 w-full lg:order-3 lg:w-auto lg:shrink-0">
+    <fieldset className="order-4 w-full">
       <legend className="sr-only">보는 역할 바꾸기</legend>
-      <div className="grid grid-cols-3 gap-1 rounded-xl bg-line/60 p-1 lg:flex lg:rounded-full">
+      <div className="grid grid-cols-3 gap-1 rounded-xl bg-line/60 p-1">
         {ROLES.map((r) => {
           const p = ROLE_PERSONA[r];
           const checked = role === r;
@@ -243,13 +352,13 @@ function RoleSwitch({ role, disabled }: { role: Role; disabled: boolean }) {
             <label
               key={r}
               title={`${p.title} · ${p.name}`}
-              className={`cursor-pointer rounded-lg px-2 py-1.5 text-center text-[13px] leading-tight has-[:focus-visible]:outline has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-accent lg:whitespace-nowrap lg:rounded-full lg:px-3 ${
+              className={`cursor-pointer rounded-lg px-2 py-1.5 text-center text-[13px] leading-tight has-[:focus-visible]:outline has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-accent ${
                 checked ? "bg-card font-semibold text-ink shadow-sm" : "text-ink-2"
               }`}
             >
               <input
                 type="radio"
-                name="role"
+                name={name}
                 value={r}
                 checked={checked}
                 onChange={() => setRole(r)}
@@ -257,7 +366,7 @@ function RoleSwitch({ role, disabled }: { role: Role; disabled: boolean }) {
                 disabled={disabled}
               />
               <span className="block">{p.title}</span>
-              <span className="block truncate text-[11px] font-normal text-ink-2 lg:sr-only">{p.name}</span>
+              <span className="block truncate text-[11px] font-normal text-ink-2">{p.name}</span>
             </label>
           );
         })}
