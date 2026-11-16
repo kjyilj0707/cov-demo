@@ -81,10 +81,10 @@ export function DealCard({ deal, role, now }: { deal: Deal; role: Role; now: Dat
   const left = daysUntil(deal.terms.deadline, now);
   const done = deal.status === "settled" || deal.status === "cancelled";
   return (
-    <li>
+    <li className="h-full">
       <Link
         href={`/deal/?id=${encodeURIComponent(deal.id)}`}
-        className="block rounded-2xl border border-line bg-card p-4 transition-colors hover:border-accent"
+        className="block h-full rounded-2xl border border-line bg-card p-4 transition-colors hover:border-accent"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">

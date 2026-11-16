@@ -27,17 +27,28 @@ export function TermsForm({
   submitLabel,
   onSubmit,
   before,
+  onChange,
 }: {
   initial: Terms;
   submitLabel: string;
   onSubmit: (t: Terms) => string | null;
   before?: React.ReactNode;
+  /** 입력이 바뀔 때마다 알린다(요약 미리보기용). 금액은 입력한 숫자만 뽑아 넘긴다. */
+  onChange?: (t: Terms) => void;
 }) {
   const [t, setT] = useState<Terms>(initial);
   const [amountText, setAmountText] = useState(initial.amount ? String(initial.amount) : "");
   const [errors, setErrors] = useState<string[]>([]);
 
-  const up = <K extends keyof Terms>(k: K, v: Terms[K]) => setT((p) => ({ ...p, [k]: v }));
+  const toAmount = (text: string) => {
+    const digits = text.replace(/[^0-9]/g, "");
+    return digits ? Number(digits) : 0;
+  };
+  const up = <K extends keyof Terms>(k: K, v: Terms[K]) => {
+    const next = { ...t, [k]: v };
+    setT(next);
+    onChange?.({ ...next, amount: toAmount(amountText) });
+  };
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -99,7 +110,10 @@ export function TermsForm({
             className={inputCls}
             inputMode="numeric"
             value={amountText}
-            onChange={(e) => setAmountText(e.target.value)}
+            onChange={(e) => {
+              setAmountText(e.target.value);
+              onChange?.({ ...t, amount: toAmount(e.target.value) });
+            }}
             placeholder="예: 300000"
             aria-describedby="amount-hint"
             required

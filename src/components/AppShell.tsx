@@ -11,6 +11,12 @@ import type { Role } from "@/lib/types";
 
 const ROLES: Role[] = ["worker", "client", "operator"];
 
+/**
+ * 화면 폭 기준: 휴대폰은 한 줄(max-w-xl), md(768px~)부터 넓히고,
+ * lg(1024px~)부터 상단 가로 내비게이션 + 최대 1152px(max-w-6xl) 데스크톱 배치.
+ */
+const WRAP = "mx-auto w-full max-w-xl px-4 md:max-w-3xl lg:max-w-6xl lg:px-8";
+
 type IconName = "home" | "list" | "plus" | "user" | "check" | "book";
 type Tab = { href: string; label: string; icon: IconName; also?: string[] };
 
@@ -68,20 +74,43 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         본문으로 건너뛰기
       </a>
 
-      <div role="note" className="no-print bg-ink px-4 py-2 text-center text-[13px] leading-snug text-on-ink">
+      <div role="note" className="no-print bg-ink px-4 py-2 text-center text-[13px] lg:py-1.5 leading-snug text-on-ink">
         <strong className="font-semibold">시범거래 안내</strong>: 결제대행(PG) 미연동. 대금은 운영자가 수기로
         확인·전달합니다. <span className="opacity-80">이 화면의 모든 이름·계좌·거래는 가상입니다.</span>
       </div>
 
       <header className="no-print sticky top-0 z-30 border-b border-line bg-paper/95 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-xl items-center justify-between gap-3 px-4 pt-3">
-          <Link href="/" aria-label="CoV 시연판 홈" className="flex items-center gap-2">
+        <div className={`${WRAP} flex flex-wrap items-center gap-x-3 gap-y-2 pb-3 pt-3 lg:flex-nowrap lg:gap-x-4 xl:gap-x-6`}>
+          <Link href="/" aria-label="CoV 시연판 홈" className="order-1 flex shrink-0 items-center gap-2">
             <span aria-hidden="true" className="text-[22px] font-black leading-none tracking-tight text-ink">
               C<span className="text-accent">o</span>V
             </span>
             <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-ink-2">시연판</span>
           </Link>
-          <div className="flex items-center gap-2">
+          <nav aria-label="주요 메뉴" className="order-2 hidden min-w-0 flex-1 lg:block">
+            <ul className="flex items-center gap-1">
+              {tabs.map((t) => {
+                const on = isActive(t);
+                return (
+                  <li key={t.href}>
+                    <Link
+                      href={t.href}
+                      aria-current={on ? "page" : undefined}
+                      className={`inline-flex min-h-10 items-center whitespace-nowrap rounded-full px-2.5 text-[14px] font-semibold xl:px-3.5 xl:text-[15px] ${
+                        on ? "bg-accent-soft text-accent" : "text-ink-2 hover:bg-muted hover:text-ink"
+                      }`}
+                    >
+                      {t.label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+
+          <RoleSwitch role={role} disabled={!demo} />
+
+          <div className="order-3 ml-auto flex shrink-0 items-center gap-2 lg:order-4 lg:ml-0">
             <button
               type="button"
               onClick={() => {
@@ -110,11 +139,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </div>
 
         {loginOpen && (
-          <div id="login-note" className="mx-auto w-full max-w-xl px-4 pt-2">
+          <div id="login-note" className={`${WRAP} pb-3`}>
             <div role="status" className="rounded-xl border border-line bg-card p-3 text-[13px] text-ink-2">
               <p className="font-semibold text-ink">시연판에는 로그인이 없습니다.</p>
               <p className="mt-1">
-                아래의 역할 버튼(작업자 / 의뢰인 / 운영자)을 눌러 보는 사람을 바꿔 주세요. 실제 서비스에서는 이메일·구글·카카오로
+                헤더의 역할 버튼(작업자 / 의뢰인 / 운영자)을 눌러 보는 사람을 바꿔 주세요. 실제 서비스에서는 이메일·구글·카카오로
                 로그인합니다.
               </p>
               <button
@@ -128,38 +157,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         )}
 
-        <fieldset className="mx-auto w-full max-w-xl px-4 pb-3 pt-2">
-          <legend className="sr-only">보는 역할 바꾸기</legend>
-          <div className="grid grid-cols-3 gap-1 rounded-xl bg-line/60 p-1">
-            {ROLES.map((r) => {
-              const p = ROLE_PERSONA[r];
-              const checked = role === r;
-              return (
-                <label
-                  key={r}
-                  className={`cursor-pointer rounded-lg px-2 py-1.5 text-center text-[13px] leading-tight has-[:focus-visible]:outline has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-accent ${
-                    checked ? "bg-card font-semibold text-ink shadow-sm" : "text-ink-2"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="role"
-                    value={r}
-                    checked={checked}
-                    onChange={() => setRole(r)}
-                    className="sr-only"
-                    disabled={!demo}
-                  />
-                  <span className="block">{p.title}</span>
-                  <span className="block truncate text-[11px] font-normal text-ink-2">{p.name}</span>
-                </label>
-              );
-            })}
-          </div>
-        </fieldset>
 
         {toolsOpen && (
-          <div id="demo-tools" className="mx-auto w-full max-w-xl px-4 pb-3">
+          <div id="demo-tools" className={`${WRAP} pb-3`}>
             <div className="rounded-xl border border-line bg-card p-3 text-[13px] text-ink-2">
               <p>
                 시연 시각: <strong className="text-ink">{demo ? formatDateTime(demoNow(demo).toISOString()) : "-"}</strong>
@@ -198,15 +198,15 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         )}
       </header>
 
-      <main id="main" className="mx-auto w-full max-w-xl flex-1 px-4 pb-40 pt-4">
+      <main id="main" className={`${WRAP} flex-1 pb-40 pt-4 lg:pb-16 lg:pt-8`}>
         {demo ? children : <p className="py-16 text-center text-ink-2">시연 데이터를 불러오는 중…</p>}
       </main>
 
       <nav
         aria-label="주요 메뉴"
-        className="no-print fixed inset-x-0 bottom-0 z-30 border-t border-line bg-card/95 backdrop-blur"
+        className="no-print fixed inset-x-0 bottom-0 z-30 border-t border-line bg-card/95 backdrop-blur lg:hidden"
       >
-        <ul className="mx-auto flex w-full max-w-xl pb-[env(safe-area-inset-bottom)]">
+        <ul className="mx-auto flex w-full max-w-xl pb-[env(safe-area-inset-bottom)] md:max-w-3xl">
           {tabs.map((t) => {
             const on = isActive(t);
             return (
@@ -227,5 +227,41 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </ul>
       </nav>
     </div>
+  );
+}
+
+/** 역할 전환. 휴대폰: 헤더 두 번째 줄 전체 폭. 데스크톱: 헤더 한 줄 안의 작은 버튼 묶음(이름은 화면 낭독기용으로만). */
+function RoleSwitch({ role, disabled }: { role: Role; disabled: boolean }) {
+  return (
+    <fieldset className="order-4 w-full lg:order-3 lg:w-auto lg:shrink-0">
+      <legend className="sr-only">보는 역할 바꾸기</legend>
+      <div className="grid grid-cols-3 gap-1 rounded-xl bg-line/60 p-1 lg:flex lg:rounded-full">
+        {ROLES.map((r) => {
+          const p = ROLE_PERSONA[r];
+          const checked = role === r;
+          return (
+            <label
+              key={r}
+              title={`${p.title} · ${p.name}`}
+              className={`cursor-pointer rounded-lg px-2 py-1.5 text-center text-[13px] leading-tight has-[:focus-visible]:outline has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-accent lg:whitespace-nowrap lg:rounded-full lg:px-3 ${
+                checked ? "bg-card font-semibold text-ink shadow-sm" : "text-ink-2"
+              }`}
+            >
+              <input
+                type="radio"
+                name="role"
+                value={r}
+                checked={checked}
+                onChange={() => setRole(r)}
+                className="sr-only"
+                disabled={disabled}
+              />
+              <span className="block">{p.title}</span>
+              <span className="block truncate text-[11px] font-normal text-ink-2 lg:sr-only">{p.name}</span>
+            </label>
+          );
+        })}
+      </div>
+    </fieldset>
   );
 }

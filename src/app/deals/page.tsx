@@ -23,69 +23,84 @@ export default function MyDealsPage() {
   const list = tab === "active" ? active : done;
 
   const amountLabel =
-    role === "worker" ? "진행 중 거래 금액(받을 예정)" : role === "client" ? "진행 중 거래 금액(낼 예정)" : "진행 중 거래 금액(전체)";
+    role === "worker"
+      ? "진행 중 거래 금액(받을 예정)"
+      : role === "client"
+        ? "진행 중 거래 금액(낼 예정)"
+        : "진행 중 거래 금액(전체)";
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 lg:space-y-6">
       <div>
-        <h1 className="text-xl font-bold">{role === "operator" ? "전체 거래" : "나의 거래"}</h1>
+        <h1 className="text-xl font-bold lg:text-2xl">{role === "operator" ? "전체 거래" : "나의 거래"}</h1>
         <p className="mt-1 text-sm text-ink-2">
           <strong className="text-ink">{ROLE_PERSONA[role].name}</strong>({ROLE_PERSONA[role].title}) 화면으로 보는 중
         </p>
       </div>
 
-      <Card aria-labelledby="sum-title">
-        <h2 id="sum-title" className="text-[13px] font-medium text-ink-2">
-          {amountLabel}
-        </h2>
-        <p className="mt-1 text-3xl font-extrabold tracking-tight">{formatWon(sum.activeAmount)}</p>
-        <p className="mt-1 text-[13px] text-ink-2">
-          진행 중 {sum.activeCount}건{sum.pendingCount > 0 && ` (조건 동의 대기 ${sum.pendingCount}건은 금액에서 뺌)`} · 정산 완료 {formatWon(sum.settledAmount)}
-        </p>
-      </Card>
+      <div className="space-y-4 lg:grid lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start lg:gap-8 lg:space-y-0">
+        <div className="space-y-4 lg:sticky lg:top-24">
+          <Card aria-labelledby="sum-title">
+            <h2 id="sum-title" className="text-[13px] font-medium text-ink-2">
+              {amountLabel}
+            </h2>
+            <p className="mt-1 text-3xl font-extrabold tracking-tight">{formatWon(sum.activeAmount)}</p>
+            <p className="mt-1 text-[13px] text-ink-2">
+              진행 중 {sum.activeCount}건
+              {sum.pendingCount > 0 && ` (조건 동의 대기 ${sum.pendingCount}건은 금액에서 뺌)`} · 정산 완료{" "}
+              {formatWon(sum.settledAmount)}
+            </p>
+          </Card>
 
-      {role === "operator" ? (
-        <Link href="/admin/" className={`${btnPrimary} w-full py-4 text-base`}>
-          운영자 처리 화면 열기
-        </Link>
-      ) : (
-        <Link href="/new/" className={`${btnPrimary} w-full py-4 text-base`}>
-          + 새 계약 생성
-        </Link>
-      )}
+          {role === "operator" ? (
+            <Link href="/admin/" className={`${btnPrimary} w-full py-4 text-base`}>
+              운영자 처리 화면 열기
+            </Link>
+          ) : (
+            <Link href="/new/" className={`${btnPrimary} w-full py-4 text-base`}>
+              + 새 계약 생성
+            </Link>
+          )}
+        </div>
 
-      <div role="group" aria-label="거래 목록 구분" className="flex gap-4 border-b border-line">
-        {(
-          [
-            ["active", `진행 중 ${active.length}`],
-            ["done", `끝난 거래 ${done.length}`],
-          ] as const
-        ).map(([k, label]) => (
-          <button
-            key={k}
-            type="button"
-            aria-pressed={tab === k}
-            onClick={() => setTab(k)}
-            className={`-mb-px border-b-2 px-1 pb-2 text-sm font-bold ${
-              tab === k ? "border-accent text-ink" : "border-transparent text-ink-2"
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+        <div className="space-y-4">
+          <div role="group" aria-label="거래 목록 구분" className="flex gap-4 border-b border-line">
+            {(
+              [
+                ["active", `진행 중 ${active.length}`],
+                ["done", `끝난 거래 ${done.length}`],
+              ] as const
+            ).map(([k, label]) => (
+              <button
+                key={k}
+                type="button"
+                aria-pressed={tab === k}
+                onClick={() => setTab(k)}
+                className={`-mb-px border-b-2 px-1 pb-2 text-sm font-bold ${
+                  tab === k ? "border-accent text-ink" : "border-transparent text-ink-2"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {list.length === 0 ? (
+            <p className="py-10 text-center text-sm text-ink-2">
+              {tab === "active" ? "진행 중인 거래가 없습니다." : "끝난 거래가 없습니다."}
+            </p>
+          ) : (
+            <ul
+              className="grid gap-3 md:grid-cols-2 lg:gap-4"
+              aria-label={tab === "active" ? "진행 중 거래" : "끝난 거래"}
+            >
+              {list.map((d) => (
+                <DealCard key={d.id} deal={d} role={role} now={now} />
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
-
-      {list.length === 0 ? (
-        <p className="py-10 text-center text-sm text-ink-2">
-          {tab === "active" ? "진행 중인 거래가 없습니다." : "끝난 거래가 없습니다."}
-        </p>
-      ) : (
-        <ul className="space-y-3" aria-label={tab === "active" ? "진행 중 거래" : "끝난 거래"}>
-          {list.map((d) => (
-            <DealCard key={d.id} deal={d} role={role} now={now} />
-          ))}
-        </ul>
-      )}
     </div>
   );
 }

@@ -23,8 +23,8 @@ export function CreatorCard({ creator, deals, backQuery }: { creator: Creator; d
   const t = trustFor({ party: creator, side: "worker", creator }, deals);
   const href = `/profile/?id=${encodeURIComponent(creator.id)}&from=search${backQuery ? `&${backQuery}` : ""}`;
   return (
-    <li>
-      <Link href={href} className="block rounded-2xl border border-line bg-card p-4 transition-colors hover:border-accent">
+    <li className="h-full">
+      <Link href={href} className="flex h-full flex-col rounded-2xl border border-line bg-card p-4 transition-colors hover:border-accent">
         <div className="flex items-start gap-3">
           <Monogram name={creator.name} />
           <div className="min-w-0 flex-1">
@@ -40,14 +40,14 @@ export function CreatorCard({ creator, deals, backQuery }: { creator: Creator; d
             <p className="mt-1.5 text-sm leading-snug">{creator.intro}</p>
           </div>
         </div>
-        <ul aria-label="대표 키워드" className="mt-3 flex flex-wrap gap-1.5">
+        <ul aria-label="대표 키워드" className="mb-3 mt-3 flex flex-wrap gap-1.5">
           {creator.keywords.map((k) => (
             <li key={k} className="rounded-full bg-muted px-2.5 py-1 text-[12px] text-ink-2">
               #{k}
             </li>
           ))}
         </ul>
-        <dl className="mt-3 flex flex-wrap gap-x-4 gap-y-1 border-t border-line pt-3 text-[13px]">
+        <dl className="mt-auto flex flex-wrap gap-x-4 gap-y-1 border-t border-line pt-3 text-[13px]">
           <div className="flex gap-1">
             <dt className="text-ink-2">완료</dt>
             <dd className="font-semibold">{t.completed}건</dd>

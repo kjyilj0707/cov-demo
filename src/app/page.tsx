@@ -49,22 +49,21 @@ function HomeView() {
   const activeCount = dealsFor(demo.deals, role, myId).filter((d) => !TERMINAL.includes(d.status)).length;
 
   return (
-    <div className="space-y-6">
-      <section aria-labelledby="hero-title" className="pt-2">
-        <p className="text-[13px] font-semibold text-accent">창작자 전용 안전거래 플랫폼</p>
-        <h1 id="hero-title" className="mt-1 text-[26px] font-extrabold leading-tight tracking-tight sm:text-3xl">
+    <div className="space-y-6 lg:space-y-10">
+      <section aria-labelledby="hero-title" className="pt-2 lg:pb-2 lg:pt-6">
+        <p className="text-[13px] font-semibold text-accent lg:text-base">창작자 전용 안전거래 플랫폼</p>
+        <h1 id="hero-title" className="mt-1 text-[26px] font-extrabold leading-tight tracking-tight sm:text-3xl lg:mt-2 lg:text-5xl">
           어떤 창작자가
-          <br />
-          필요하세요?
+          <br className="lg:hidden" /> 필요하세요?
         </h1>
-        <p className="mt-2 text-sm text-ink-2">
+        <p className="mt-2 text-sm text-ink-2 lg:mt-3 lg:text-base">
           음악·디자인 창작자를 찾고, 조건을 정해 계약하고, 납품·검수·정산까지 한 곳에서 이어 갑니다.
         </p>
 
         <form
           role="search"
           aria-label="창작자 검색"
-          className="relative mt-5"
+          className="relative mt-5 lg:mt-8 lg:max-w-3xl"
           onSubmit={(e) => {
             e.preventDefault();
             syncUrl(query, cat);
@@ -81,12 +80,12 @@ function HomeView() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="믹싱, 포스터, 뮤직비디오…"
-            className="min-h-14 w-full rounded-full border border-line bg-card pl-5 pr-14 text-base text-ink shadow-sm placeholder:text-ink-3 focus:border-accent focus:outline-none focus-visible:outline-3 focus-visible:outline-accent"
+            className="min-h-14 w-full rounded-full border border-line bg-card pl-5 pr-14 text-base lg:min-h-16 lg:pl-7 lg:pr-16 lg:text-lg text-ink shadow-sm placeholder:text-ink-3 focus:border-accent focus:outline-none focus-visible:outline-3 focus-visible:outline-accent"
           />
           <button
             type="submit"
             aria-label="검색"
-            className="absolute right-1.5 top-1/2 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-ink text-on-ink"
+            className="absolute right-1.5 top-1/2 inline-flex size-11 -translate-y-1/2 lg:right-2 lg:size-12 items-center justify-center rounded-full bg-ink text-on-ink"
           >
             <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
               <path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4" />
@@ -94,9 +93,9 @@ function HomeView() {
           </button>
         </form>
 
-        <div className="mt-3">
+        <div className="mt-3 lg:mt-4">
           <h2 className="sr-only">많이 찾는 키워드</h2>
-          <ul className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
+          <ul className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] lg:mx-0 lg:flex-wrap lg:overflow-visible lg:px-0">
             {POPULAR_KEYWORDS.map((k) => {
               const on = query.trim() === k;
               return (
@@ -124,7 +123,7 @@ function HomeView() {
 
       <section aria-labelledby="cat-title">
         <div className="flex items-baseline justify-between">
-          <h2 id="cat-title" className="text-base font-bold">
+          <h2 id="cat-title" className="text-base font-bold lg:text-xl">
             분야로 찾기
           </h2>
           {cat && (
@@ -140,7 +139,7 @@ function HomeView() {
             </button>
           )}
         </div>
-        <ul className="-mx-4 mt-3 flex gap-1 overflow-x-auto px-4 pb-2 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-8 sm:px-0">
+        <ul className="-mx-4 mt-3 flex gap-1 overflow-x-auto px-4 pb-2 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-8 sm:px-0 lg:mt-4 lg:gap-3">
           {CATEGORIES.map((k) => {
             const on = cat === k.id;
             return (
@@ -154,16 +153,16 @@ function HomeView() {
                     setCat(next);
                     syncUrl(query, next);
                   }}
-                  className="group flex w-[4.75rem] flex-col items-center gap-1.5 rounded-xl px-1 py-1.5 text-center sm:w-full"
+                  className="group flex w-[4.75rem] flex-col items-center gap-1.5 rounded-xl px-1 py-1.5 text-center sm:w-full lg:gap-2.5 lg:rounded-2xl lg:border lg:border-line lg:py-5 lg:hover:border-accent"
                 >
                   <span
-                    className={`inline-flex size-14 items-center justify-center rounded-2xl ${
+                    className={`inline-flex size-14 items-center justify-center rounded-2xl lg:size-16 ${
                       on ? "bg-accent text-on-accent" : "bg-accent-soft text-accent group-hover:bg-accent group-hover:text-on-accent"
                     }`}
                   >
                     <CategoryIcon id={k.id} className="size-7" />
                   </span>
-                  <span className={`text-[12px] leading-tight ${on ? "font-bold text-ink" : "font-medium text-ink-2"}`}>{k.label}</span>
+                  <span className={`text-[12px] leading-tight lg:text-sm ${on ? "font-bold text-ink" : "font-medium text-ink-2"}`}>{k.label}</span>
                 </button>
               </li>
             );
@@ -172,7 +171,7 @@ function HomeView() {
       </section>
 
       <section aria-labelledby="results-title">
-        <h2 id="results-title" className="text-base font-bold">
+        <h2 id="results-title" className="text-base font-bold lg:text-xl">
           <span id="results" tabIndex={-1} className="focus:outline-none">
             {searching ? "검색 결과" : "추천 창작자"}
           </span>
@@ -199,7 +198,7 @@ function HomeView() {
             </button>
           </div>
         ) : (
-          <ul className="mt-3 space-y-3">
+          <ul className="mt-3 grid gap-3 md:grid-cols-2 lg:mt-4 lg:grid-cols-3 lg:gap-4">
             {results.map((c) => (
               <CreatorCard key={c.id} creator={c} deals={demo.deals} backQuery={backQs.toString()} />
             ))}
@@ -209,7 +208,7 @@ function HomeView() {
 
       <Link
         href="/deals/"
-        className="flex items-center justify-between rounded-2xl border border-line bg-card p-4 hover:border-accent"
+        className="flex items-center justify-between rounded-2xl border border-line bg-card p-4 hover:border-accent lg:max-w-sm"
       >
         <span>
           <span className="block text-[13px] text-ink-2">{role === "operator" ? "전체 거래" : "나의 거래"}</span>

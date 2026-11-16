@@ -24,42 +24,46 @@ export default function AdminPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-xl font-bold">운영자 화면</h1>
+        <h1 className="text-xl font-bold lg:text-2xl">운영자 화면</h1>
         <p className="mt-1 text-sm text-ink-2">
-          입금 확인과 지급은 통장을 직접 보고 수기로 처리합니다. 처리 버튼은 각 거래 화면 아래에 있습니다.
+          입금 확인과 지급은 통장을 직접 보고 수기로 처리합니다. 처리 버튼은 각 거래 화면의 &lsquo;지금 할 일&rsquo;에 있습니다.
         </p>
       </div>
 
-      <Queue
-        title="입금 확인 대기"
-        desc="의뢰인이 '이체했어요'를 누른 거래. 통장에서 입금자명·금액을 확인하세요."
-        deals={depositQueue}
-        extra={(d) => `알린 입금자명 ${d.deposit?.reportedDepositorName ?? "-"} · ${formatDateTime(d.deposit?.reportedAt)}`}
-      />
-      <Queue
-        title="지급 대기"
-        desc="검수가 끝난 거래. 작업자에게 송금한 뒤 '지급 완료'를 누르세요."
-        deals={payoutQueue}
-        extra={(d) => `작업자 ${d.worker.name}에게 지급`}
-      />
-      <Queue
-        title="분쟁 목록"
-        desc="분쟁 사유와 해소 내용은 상태 이력에 남습니다."
-        deals={disputes}
-        extra={(d) => d.history.at(-1)?.reason ?? ""}
-      />
-      <Queue
-        title="입금 전(의뢰인 이체 대기)"
-        desc="아직 의뢰인이 이체를 알리지 않은 거래."
-        deals={waitingDeposit}
-        extra={(d) => `계약 성립 ${formatDateTime(d.agreement?.agreedAt)}`}
-      />
-      <Queue
-        title="직접 송금 거래(기록만 보기)"
-        desc="의뢰인과 작업자가 직접 주고받습니다. 운영자는 양측 확인 기록만 봅니다."
-        deals={directActive}
-        extra={() => ""}
-      />
+      <div className="space-y-5 lg:grid lg:grid-cols-2 lg:items-start lg:gap-6 lg:space-y-0">
+        <Queue
+          title="입금 확인 대기"
+          desc="의뢰인이 '이체했어요'를 누른 거래. 통장에서 입금자명·금액을 확인하세요."
+          deals={depositQueue}
+          extra={(d) =>
+            `알린 입금자명 ${d.deposit?.reportedDepositorName ?? "-"} · ${formatDateTime(d.deposit?.reportedAt)}`
+          }
+        />
+        <Queue
+          title="지급 대기"
+          desc="검수가 끝난 거래. 작업자에게 송금한 뒤 '지급 완료'를 누르세요."
+          deals={payoutQueue}
+          extra={(d) => `작업자 ${d.worker.name}에게 지급`}
+        />
+        <Queue
+          title="분쟁 목록"
+          desc="분쟁 사유와 해소 내용은 상태 이력에 남습니다."
+          deals={disputes}
+          extra={(d) => d.history.at(-1)?.reason ?? ""}
+        />
+        <Queue
+          title="입금 전(의뢰인 이체 대기)"
+          desc="아직 의뢰인이 이체를 알리지 않은 거래."
+          deals={waitingDeposit}
+          extra={(d) => `계약 성립 ${formatDateTime(d.agreement?.agreedAt)}`}
+        />
+        <Queue
+          title="직접 송금 거래(기록만 보기)"
+          desc="의뢰인과 작업자가 직접 주고받습니다. 운영자는 양측 확인 기록만 봅니다."
+          deals={directActive}
+          extra={() => ""}
+        />
+      </div>
 
       <Link href="/ledger/" className="block text-center text-sm font-semibold text-accent underline">
         대금 장부 전체 보기
@@ -84,7 +88,9 @@ function Queue({
     <Card aria-labelledby={id}>
       <h2 id={id} className="flex items-center gap-2 text-base font-bold">
         {title}
-        <span className={`rounded-full px-2 py-0.5 text-xs ${deals.length ? "bg-accent text-on-accent" : "bg-line text-ink-2"}`}>
+        <span
+          className={`rounded-full px-2 py-0.5 text-xs ${deals.length ? "bg-accent text-on-accent" : "bg-line text-ink-2"}`}
+        >
           {deals.length}
         </span>
       </h2>
@@ -95,7 +101,10 @@ function Queue({
         <ul className="mt-3 divide-y divide-line">
           {deals.map((d) => (
             <li key={d.id}>
-              <Link href={`/deal/?id=${encodeURIComponent(d.id)}`} className="flex items-start justify-between gap-3 py-2.5 hover:text-accent">
+              <Link
+                href={`/deal/?id=${encodeURIComponent(d.id)}`}
+                className="flex items-start justify-between gap-3 py-2.5 hover:text-accent"
+              >
                 <span className="min-w-0">
                   <span className="block font-semibold">{d.terms.title}</span>
                   <span className="block text-[13px] text-ink-2">

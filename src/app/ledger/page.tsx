@@ -17,19 +17,19 @@ export default function LedgerPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-xl font-bold">대금 장부</h1>
+        <h1 className="text-xl font-bold lg:text-2xl">대금 장부</h1>
         <p className="mt-1 text-sm text-ink-2">
           계약이 성립한 거래의 대금 흐름입니다. 실제 서비스에서는 이 표가 Notion 대금 장부로 동기화됩니다
           (시연판은 모의, 동기화 없음).
         </p>
       </div>
       <div className="overflow-x-auto rounded-2xl border border-line bg-card" tabIndex={0} role="region" aria-label="대금 장부 표(가로로 스크롤)">
-        <table className="w-full min-w-[720px] border-collapse text-[13px]">
+        <table className="w-full min-w-[720px] border-collapse text-[13px] lg:text-sm">
           <caption className="sr-only">대금 장부</caption>
           <thead className="bg-muted text-left text-ink-2">
             <tr>
               {["거래", "금액", "입금자명", "입금 확인일", "지급일", "대금 경로", "상태"].map((h) => (
-                <th key={h} scope="col" className="whitespace-nowrap border-b border-line px-3 py-2 font-semibold">
+                <th key={h} scope="col" className="whitespace-nowrap border-b border-line px-3 py-2 lg:px-4 lg:py-3 font-semibold">
                   {h}
                 </th>
               ))}
@@ -38,7 +38,7 @@ export default function LedgerPage() {
           <tbody>
             {rows.map((d) => (
               <tr key={d.id} className="border-b border-line last:border-0">
-                <th scope="row" className="px-3 py-2 text-left font-semibold">
+                <th scope="row" className="px-3 py-2 lg:px-4 lg:py-3 text-left font-semibold">
                   <Link href={`/deal/?id=${encodeURIComponent(d.id)}`} className="hover:text-accent hover:underline">
                     {d.terms.title}
                   </Link>
@@ -46,12 +46,12 @@ export default function LedgerPage() {
                     {d.client.name} → {d.worker.name}
                   </span>
                 </th>
-                <td className="whitespace-nowrap px-3 py-2 text-right">{formatWon(agreedAmount(d))}</td>
-                <td className="whitespace-nowrap px-3 py-2">{d.deposit?.depositorName ?? d.deposit?.reportedDepositorName ?? "-"}</td>
-                <td className="whitespace-nowrap px-3 py-2">{formatDate(d.deposit?.confirmedAt)}</td>
-                <td className="whitespace-nowrap px-3 py-2">{formatDate(d.payout?.paidAt)}</td>
-                <td className="whitespace-nowrap px-3 py-2">{PAYMENT_ROUTE_LABEL[d.terms.paymentRoute]}</td>
-                <td className="whitespace-nowrap px-3 py-2">{statusLabel(d)}</td>
+                <td className="whitespace-nowrap px-3 py-2 lg:px-4 lg:py-3 text-right">{formatWon(agreedAmount(d))}</td>
+                <td className="whitespace-nowrap px-3 py-2 lg:px-4 lg:py-3">{d.deposit?.depositorName ?? d.deposit?.reportedDepositorName ?? "-"}</td>
+                <td className="whitespace-nowrap px-3 py-2 lg:px-4 lg:py-3">{formatDate(d.deposit?.confirmedAt)}</td>
+                <td className="whitespace-nowrap px-3 py-2 lg:px-4 lg:py-3">{formatDate(d.payout?.paidAt)}</td>
+                <td className="whitespace-nowrap px-3 py-2 lg:px-4 lg:py-3">{PAYMENT_ROUTE_LABEL[d.terms.paymentRoute]}</td>
+                <td className="whitespace-nowrap px-3 py-2 lg:px-4 lg:py-3">{statusLabel(d)}</td>
               </tr>
             ))}
           </tbody>

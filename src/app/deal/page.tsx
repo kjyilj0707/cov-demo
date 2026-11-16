@@ -50,72 +50,107 @@ function DealView() {
   const { role } = demo;
   const now = demoNow(demo);
 
+  // 배치: 휴대폰은 한 줄(지금 상황 → 진행 단계 → 계약 정보 → 작업 범위 → 대금 → 타임라인 → 이력 → 하단 고정 버튼).
+  // lg(1024px~)는 왼쪽 본문 + 오른쪽 고정 사이드(지금 상황, 대금, 할 일 버튼) 2단.
+  // 두 묶음은 휴대폰에서 display:contents로 풀리고 order로 순서를 맞춘다.
   return (
-    <div className="space-y-4">
-      <Link href="/deals/" className="text-sm font-semibold text-ink-2 hover:text-ink">
-        ← {role === "operator" ? "전체 거래" : "나의 거래"}
-      </Link>
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="text-xl font-extrabold leading-snug">{deal.terms.title}</h1>
-          <p className="mt-1 text-[13px] text-ink-2">
-            작업자 {deal.worker.name} · 의뢰인 {deal.client.name}
-          </p>
+    <div className="space-y-4 lg:space-y-6">
+      <div className="space-y-3">
+        <Link href="/deals/" className="text-sm font-semibold text-ink-2 hover:text-ink">
+          ← {role === "operator" ? "전체 거래" : "나의 거래"}
+        </Link>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-xl font-extrabold leading-snug lg:text-2xl">{deal.terms.title}</h1>
+            <p className="mt-1 text-[13px] text-ink-2">
+              작업자 {deal.worker.name} · 의뢰인 {deal.client.name}
+            </p>
+          </div>
+          <StatusBadge deal={deal} />
         </div>
-        <StatusBadge deal={deal} />
       </div>
 
-      <NowBox deal={deal} role={role} now={now} />
+      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-8">
+        <div className="contents lg:block lg:space-y-4">
+          <div className="order-2">
+            <Steps deal={deal} />
+          </div>
 
-      <Steps deal={deal} />
+          <div className="order-3">
+            {editing ? (
+              <Card aria-labelledby="edit-t">
+                <h2 id="edit-t" className="mb-3 text-base font-bold">
+                  조건 수정(동의 전)
+                </h2>
+                {editError && (
+                  <p role="alert" className="mb-3 rounded-xl bg-danger-soft p-3 text-sm text-danger">
+                    {editError}
+                  </p>
+                )}
+                <TermsForm
+                  initial={deal.terms}
+                  submitLabel="수정한 조건으로 다시 요청"
+                  onSubmit={(terms) => {
+                    const r = act(deal.id, { type: "edit_terms", terms });
+                    if (!r.ok) return r.message;
+                    setEditing(false);
+                    setEditError("");
+                    return null;
+                  }}
+                />
+                <button
+                  type="button"
+                  className="mt-3 w-full text-sm font-semibold text-ink-2 underline"
+                  onClick={() => setEditing(false)}
+                >
+                  수정 취소
+                </button>
+              </Card>
+            ) : (
+              <TermsCard deal={deal} />
+            )}
+          </div>
 
-      {editing ? (
-        <Card aria-labelledby="edit-t">
-          <h2 id="edit-t" className="mb-3 text-base font-bold">
-            조건 수정(동의 전)
-          </h2>
-          {editError && (
-            <p role="alert" className="mb-3 rounded-xl bg-danger-soft p-3 text-sm text-danger">
-              {editError}
+          <div className="order-4">
+            <Card aria-labelledby="scope-t">
+              <h2 id="scope-t" className="text-base font-bold">
+                작업 범위
+              </h2>
+              <p className="mt-2 whitespace-pre-wrap text-[15px] leading-relaxed">{deal.terms.scope}</p>
+            </Card>
+          </div>
+
+          <div className="order-6">
+            <DeliveryTimeline deal={deal} />
+          </div>
+
+          <div className="order-7">
+            <HistoryList deal={deal} />
+          </div>
+        </div>
+
+        <aside aria-label="지금 상황과 할 일" className="contents lg:sticky lg:top-24 lg:block lg:space-y-4">
+          <div className="order-1">
+            <NowBox deal={deal} role={role} now={now} />
+          </div>
+
+          <div className="no-print order-8 sticky bottom-16 z-20 -mx-4 border-t border-line bg-card/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border lg:static lg:z-auto lg:bg-card lg:p-4 lg:backdrop-blur-none">
+            <h2 className="sr-only lg:not-sr-only lg:mb-3 lg:text-base lg:font-bold">지금 할 일</h2>
+            <p className="sr-only" aria-live="polite">
+              현재 상태: {statusLabel(deal)}
             </p>
-          )}
-          <TermsForm
-            initial={deal.terms}
-            submitLabel="수정한 조건으로 다시 요청"
-            onSubmit={(terms) => {
-              const r = act(deal.id, { type: "edit_terms", terms });
-              if (!r.ok) return r.message;
-              setEditing(false);
-              setEditError("");
-              return null;
-            }}
-          />
-          <button type="button" className="mt-3 w-full text-sm font-semibold text-ink-2 underline" onClick={() => setEditing(false)}>
-            수정 취소
-          </button>
-        </Card>
-      ) : (
-        <TermsCard deal={deal} />
-      )}
+            <ActionPanel
+              key={`${deal.id}-${role}-${deal.status}`}
+              deal={deal}
+              role={role}
+              onEditTerms={() => setEditing(true)}
+            />
+          </div>
 
-      <Card aria-labelledby="scope-t">
-        <h2 id="scope-t" className="text-base font-bold">
-          작업 범위
-        </h2>
-        <p className="mt-2 whitespace-pre-wrap text-[15px] leading-relaxed">{deal.terms.scope}</p>
-      </Card>
-
-      <PaymentCard deal={deal} role={role} />
-
-      <DeliveryTimeline deal={deal} />
-
-      <HistoryList deal={deal} />
-
-      <div className="no-print sticky bottom-[57px] z-20 -mx-4 border-t border-line bg-card/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border">
-        <p className="sr-only" aria-live="polite">
-          현재 상태: {statusLabel(deal)}
-        </p>
-        <ActionPanel key={`${deal.id}-${role}-${deal.status}`} deal={deal} role={role} onEditTerms={() => setEditing(true)} />
+          <div className="order-5">
+            <PaymentCard deal={deal} role={role} />
+          </div>
+        </aside>
       </div>
     </div>
   );
@@ -229,7 +264,8 @@ function Steps({ deal }: { deal: Deal }) {
   return (
     <Card aria-labelledby="steps-t">
       <h2 id="steps-t" className="text-base font-bold">
-        진행 단계 <span className="text-[13px] font-normal text-ink-2">({PAYMENT_ROUTE_LABEL[deal.terms.paymentRoute]})</span>
+        진행 단계{" "}
+        <span className="text-[13px] font-normal text-ink-2">({PAYMENT_ROUTE_LABEL[deal.terms.paymentRoute]})</span>
       </h2>
       <ol className="mt-3 grid grid-cols-7 gap-1">
         {MAIN_FLOW.map((s, i) => {
@@ -239,12 +275,24 @@ function Steps({ deal }: { deal: Deal }) {
               <span
                 aria-hidden
                 className={`mx-auto mb-1 block h-1.5 rounded-full ${
-                  state === "done" ? "bg-accent" : state === "now" ? (deal.status === "disputed" ? "bg-danger" : deal.status === "cancelled" ? "bg-ink-3" : "bg-accent/50") : "bg-line"
+                  state === "done"
+                    ? "bg-accent"
+                    : state === "now"
+                      ? deal.status === "disputed"
+                        ? "bg-danger"
+                        : deal.status === "cancelled"
+                          ? "bg-ink-3"
+                          : "bg-accent/50"
+                      : "bg-line"
                 }`}
               />
-              <span className={`block text-[11px] leading-tight ${state === "now" ? "font-bold text-ink" : "text-ink-2"}`}>
+              <span
+                className={`block text-[11px] leading-tight ${state === "now" ? "font-bold text-ink" : "text-ink-2"}`}
+              >
                 {names[s]}
-                <span className="sr-only">{state === "done" ? " (끝남)" : state === "now" ? " (현재)" : " (남음)"}</span>
+                <span className="sr-only">
+                  {state === "done" ? " (끝남)" : state === "now" ? " (현재)" : " (남음)"}
+                </span>
               </span>
             </li>
           );
@@ -272,7 +320,9 @@ function TermsCard({ deal }: { deal: Deal }) {
         {deal.agreement ? (
           <span className="rounded-full bg-ink px-2.5 py-1 text-xs font-semibold text-on-ink">조건 잠김</span>
         ) : deal.status === "proposed" ? (
-          <span className="rounded-full bg-accent-soft px-2.5 py-1 text-xs font-semibold text-accent">동의 전 · 수정 가능</span>
+          <span className="rounded-full bg-accent-soft px-2.5 py-1 text-xs font-semibold text-accent">
+            동의 전 · 수정 가능
+          </span>
         ) : null}
       </div>
       <dl className="mt-3 divide-y divide-line text-[15px]">
@@ -284,7 +334,10 @@ function TermsCard({ deal }: { deal: Deal }) {
             ["수정 가능 횟수", `${shown.revisionLimit}회 (${revisionText(deal)} 사용)`],
             ["납품 파일 형식", shown.fileFormats.join(", ")],
             ["대금 경로", PAYMENT_ROUTE_LABEL[shown.paymentRoute]],
-            ["제안", `${ROLE_LABEL[deal.proposedBy]} (${deal.proposedBy === "worker" ? deal.worker.name : deal.client.name})`],
+            [
+              "제안",
+              `${ROLE_LABEL[deal.proposedBy]} (${deal.proposedBy === "worker" ? deal.worker.name : deal.client.name})`,
+            ],
           ] as [string, string][]
         ).map(([k, v]) => (
           <div key={k} className="flex justify-between gap-4 py-2">
@@ -323,7 +376,10 @@ function TermsCard({ deal }: { deal: Deal }) {
           </div>
           <p className="text-ink-2">
             PDF 사본 양측 발송: <strong className="text-ink">발송됨으로 표시(모의, 실제 발송 없음)</strong> ·{" "}
-            <Link href={`/deal/print/?id=${encodeURIComponent(deal.id)}`} className="font-semibold text-accent underline">
+            <Link
+              href={`/deal/print/?id=${encodeURIComponent(deal.id)}`}
+              className="font-semibold text-accent underline"
+            >
               인쇄용 계약 요약 보기
             </Link>
           </p>
@@ -344,7 +400,8 @@ function PaymentCard({ deal, role }: { deal: Deal; role: Role }) {
   return (
     <Card aria-labelledby="pay-t">
       <h2 id="pay-t" className="text-base font-bold">
-        대금 <span className="text-[13px] font-normal text-ink-2">· {PAYMENT_ROUTE_LABEL[deal.terms.paymentRoute]}</span>
+        대금{" "}
+        <span className="text-[13px] font-normal text-ink-2">· {PAYMENT_ROUTE_LABEL[deal.terms.paymentRoute]}</span>
       </h2>
       {showAccount && (role === "client" || role === "operator") && (
         <div className="mt-3 rounded-xl border border-accent/30 bg-accent-soft p-3 text-sm">
@@ -366,10 +423,21 @@ function PaymentCard({ deal, role }: { deal: Deal; role: Role }) {
         </p>
       )}
       <dl className="mt-3 space-y-1 text-[13px]">
-        <Row k={direct ? "송금 알림" : "이체 알림"} v={deal.deposit?.reportedAt ? `${formatDateTime(deal.deposit.reportedAt)} (입금자명 ${deal.deposit.reportedDepositorName})` : "-"} />
+        <Row
+          k={direct ? "송금 알림" : "이체 알림"}
+          v={
+            deal.deposit?.reportedAt
+              ? `${formatDateTime(deal.deposit.reportedAt)} (입금자명 ${deal.deposit.reportedDepositorName})`
+              : "-"
+          }
+        />
         <Row
           k={direct ? "작업자 수령 확인" : "운영자 입금 확인"}
-          v={deal.deposit?.confirmedAt ? `${formatDateTime(deal.deposit.confirmedAt)} · 확인자 ${deal.deposit.confirmedBy}` : "-"}
+          v={
+            deal.deposit?.confirmedAt
+              ? `${formatDateTime(deal.deposit.confirmedAt)} · 확인자 ${deal.deposit.confirmedBy}`
+              : "-"
+          }
         />
         <Row
           k={direct ? "정산 확인" : "운영자 지급"}
@@ -454,7 +522,7 @@ function HistoryList({ deal }: { deal: Deal }) {
                 {h.from ? `${STATUS_NAME(h.from, deal)} → ` : ""}
                 {STATUS_NAME(h.to, deal)}
                 <span className="ml-1 font-normal text-ink-2">
-                  · {h.action === "create" ? "초안 작성" : ACTION_LABEL[h.action as ActionType] ?? h.action}
+                  · {h.action === "create" ? "초안 작성" : (ACTION_LABEL[h.action as ActionType] ?? h.action)}
                 </span>
               </p>
               <p className="text-ink-2">
