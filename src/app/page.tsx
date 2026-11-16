@@ -53,8 +53,8 @@ function HomeView() {
       <section aria-labelledby="hero-title" className="pt-2 lg:pb-2 lg:pt-6">
         <p className="text-[13px] font-semibold text-accent lg:text-base">창작자 전용 안전거래 플랫폼</p>
         <h1 id="hero-title" className="mt-1 text-[26px] font-extrabold leading-tight tracking-tight sm:text-3xl lg:mt-2 lg:text-5xl">
-          어떤 창작자가
-          <br className="lg:hidden" /> 필요하세요?
+          다양한 창작자들을
+          <br className="lg:hidden" /> 누려보세요
         </h1>
         <p className="mt-2 text-sm text-ink-2 lg:mt-3 lg:text-base">
           음악·디자인 창작자를 찾고, 조건을 정해 계약하고, 납품·검수·정산까지 한 곳에서 이어 갑니다.
