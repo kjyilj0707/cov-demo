@@ -134,7 +134,7 @@ function DealView() {
             <NowBox deal={deal} role={role} now={now} />
           </div>
 
-          <div className="no-print order-8 sticky bottom-16 z-20 -mx-4 border-t border-line bg-card/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border lg:static lg:z-auto lg:bg-card lg:p-4 lg:backdrop-blur-none">
+          <div className="no-print order-8 sticky bottom-16 md:bottom-0 z-20 -mx-4 border-t border-line bg-card/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border lg:static lg:z-auto lg:bg-card lg:p-4 lg:backdrop-blur-none">
             <h2 className="sr-only lg:not-sr-only lg:mb-3 lg:text-base lg:font-bold">지금 할 일</h2>
             <p className="sr-only" aria-live="polite">
               현재 상태: {statusLabel(deal)}

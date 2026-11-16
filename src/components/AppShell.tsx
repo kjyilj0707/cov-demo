@@ -92,8 +92,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </div>
 
       <header className="no-print sticky top-0 z-30 border-b border-line bg-paper/95 backdrop-blur">
-        {/* 컴퓨터(lg~): 위 얇은 유틸 줄 + 큰 로고·큰 메뉴 줄 */}
-        <div className="hidden lg:block">
+        {/* 컴퓨터(md 768px~): 위 얇은 유틸 줄 + 큰 로고·큰 메뉴 줄 */}
+        <div className="hidden md:block">
           <div className={`${WRAP} flex h-9 items-center justify-end gap-5 text-[13px] text-ink-2`}>
             <button
               type="button"
@@ -121,16 +121,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               로그인
             </button>
           </div>
-          <div className={`${WRAP} flex h-20 items-center justify-between gap-8`}>
+          <div className={`${WRAP} flex h-20 items-center justify-between gap-4 lg:gap-8`}>
             <Link href="/" aria-label="CoV 시연판 홈" className="flex shrink-0 items-center gap-3">
-              <span aria-hidden="true" className="text-[40px] font-black leading-none tracking-tight text-ink">
+              <span aria-hidden="true" className="text-[32px] lg:text-[40px] font-black leading-none tracking-tight text-ink">
                 C<span className="text-accent">o</span>V
               </span>
               <span className="rounded-full bg-muted px-2.5 py-0.5 text-[12px] font-semibold text-ink-2">시연판</span>
             </Link>
-            <div className="flex items-center gap-8 xl:gap-10">
+            <div className="flex items-center gap-4 lg:gap-8 xl:gap-10">
               <nav aria-label="주요 메뉴">
-                <ul className="flex items-center gap-7 xl:gap-9">
+                <ul className="flex items-center gap-5 lg:gap-7 xl:gap-9">
                   {tabs.map((t) => {
                     const on = isActive(t);
                     return (
@@ -138,7 +138,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                         <Link
                           href={t.href}
                           aria-current={on ? "page" : undefined}
-                          className={`inline-flex min-h-11 items-center whitespace-nowrap text-[20px] text-ink hover:underline hover:underline-offset-8 ${
+                          className={`inline-flex min-h-11 items-center whitespace-nowrap text-[17px] lg:text-[20px] text-ink hover:underline hover:underline-offset-8 ${
                             on ? "font-extrabold" : "font-normal"
                           }`}
                         >
@@ -164,7 +164,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* 휴대폰·태블릿(~1023px): 기존 두 줄 헤더 */}
-        <div className={`${WRAP} flex flex-wrap items-center gap-x-3 gap-y-2 pb-3 pt-3 lg:hidden`}>
+        <div className={`${WRAP} flex flex-wrap items-center gap-x-3 gap-y-2 pb-3 pt-3 md:hidden`}>
           <Link href="/" aria-label="CoV 시연판 홈" className="order-1 flex shrink-0 items-center gap-2">
             <span aria-hidden="true" className="text-[22px] font-black leading-none tracking-tight text-ink">
               C<span className="text-accent">o</span>V
@@ -261,13 +261,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         )}
       </header>
 
-      <main id="main" className={`${WRAP} flex-1 pb-40 pt-4 lg:pb-16 lg:pt-8`}>
+      <main id="main" className={`${WRAP} flex-1 pb-40 pt-4 md:pb-16 lg:pt-8`}>
         {demo ? children : <p className="py-16 text-center text-ink-2">시연 데이터를 불러오는 중…</p>}
       </main>
 
       <nav
         aria-label="주요 메뉴"
-        className="no-print fixed inset-x-0 bottom-0 z-30 border-t border-line bg-card/95 backdrop-blur lg:hidden"
+        className="no-print fixed inset-x-0 bottom-0 z-30 border-t border-line bg-card/95 backdrop-blur md:hidden"
       >
         <ul className="mx-auto flex w-full max-w-xl pb-[env(safe-area-inset-bottom)] md:max-w-3xl">
           {tabs.map((t) => {
