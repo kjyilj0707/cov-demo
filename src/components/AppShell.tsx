@@ -126,6 +126,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <span aria-hidden="true" className="text-[32px] lg:text-[40px] font-black leading-none tracking-tight text-ink">
                 C<span className="text-accent">o</span>V
               </span>
+              <span aria-hidden="true" className="h-8 w-px bg-ink lg:h-10" />
+              <span className="text-[12px] font-bold leading-tight text-ink lg:text-[13px]">
+                Connection
+                <br />
+                of Values
+              </span>
               <span className="rounded-full bg-muted px-2.5 py-0.5 text-[12px] font-semibold text-ink-2">시연판</span>
             </Link>
             <div className="flex items-center gap-4 lg:gap-8 xl:gap-10">
@@ -169,6 +175,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <span aria-hidden="true" className="text-[22px] font-black leading-none tracking-tight text-ink">
               C<span className="text-accent">o</span>V
             </span>
+            <span className="hidden text-[11px] font-semibold leading-none text-ink-2 min-[400px]:inline">Connection of Values</span>
             <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-ink-2">시연판</span>
           </Link>
           <RoleSwitch role={role} disabled={!demo} name="role" />
