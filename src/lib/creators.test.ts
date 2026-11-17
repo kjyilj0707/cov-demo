@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { CATEGORIES, CREATORS, findProfileTarget, findSubcategory, searchCreators } from "./creators";
+import {
+  CATEGORIES,
+  CREATORS,
+  findProfileTarget,
+  findSubcategory,
+  parseSheetView,
+  searchCreators,
+  sheetListLabel,
+} from "./creators";
 import { ME_CLIENT, ME_WORKER } from "./personas";
 
 describe("creators 정적 데이터", () => {
@@ -87,5 +95,24 @@ describe("POPULAR_KEYWORDS", () => {
   it("인기 키워드는 모두 결과가 한 명 이상 나온다", async () => {
     const { POPULAR_KEYWORDS } = await import("./creators");
     for (const k of POPULAR_KEYWORDS) expect(searchCreators(k, null).length, k).toBeGreaterThan(0);
+  });
+});
+
+describe("카테고리 패널 상태(?sheet=&list=)", () => {
+  it("분야와 세부 분야·전체를 읽는다", () => {
+    expect(parseSheetView("mediaart", "interactive")).toEqual({ cat: "mediaart", list: "interactive" });
+    expect(parseSheetView("mediaart", "all")).toEqual({ cat: "mediaart", list: "all" });
+    expect(parseSheetView("mediaart", null)).toEqual({ cat: "mediaart", list: null });
+  });
+
+  it("없는 분야면 패널을 열지 않고, 다른 분야의 세부 분야는 세부 분야 목록으로 되돌린다", () => {
+    expect(parseSheetView(null, "dj")).toBeNull();
+    expect(parseSheetView("nope", "all")).toBeNull();
+    expect(parseSheetView("mediaart", "dj")).toEqual({ cat: "mediaart", list: null });
+  });
+
+  it("목록 제목", () => {
+    expect(sheetListLabel({ cat: "mediaart", list: "interactive" })).toBe("미디어아트 › 인터랙티브");
+    expect(sheetListLabel({ cat: "mediaart", list: "all" })).toBe("미디어아트 전체");
   });
 });

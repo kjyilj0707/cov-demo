@@ -7,7 +7,7 @@ import { CategoryIcon } from "@/components/CategoryIcon";
 import { CategorySheet } from "@/components/CategorySheet";
 import { CreatorCard } from "@/components/CreatorCard";
 import { TERMINAL } from "@/lib/deal-machine";
-import { CATEGORIES, POPULAR_KEYWORDS, findCategory, findSubcategory, searchCreators } from "@/lib/creators";
+import { CATEGORIES, POPULAR_KEYWORDS, findCategory, parseSheetView, searchCreators, type SheetView } from "@/lib/creators";
 import { ME_CLIENT, ME_WORKER } from "@/lib/personas";
 import { useDemo } from "@/lib/store";
 import { dealsFor } from "@/lib/stats";
@@ -27,9 +27,8 @@ function HomeView() {
   const demo = useDemo();
   const [query, setQuery] = useState(params.get("q") ?? "");
   const [cat, setCat] = useState<string | null>(params.get("cat"));
-  // 세부 분야는 고른 분야 안의 것만 받는다(주소를 손으로 고친 경우 대비)
-  const [sub, setSub] = useState<string | null>(() => (findSubcategory(params.get("cat"), params.get("sub")) ? params.get("sub") : null));
-  const [sheetOpen, setSheetOpen] = useState(false);
+  // 카테고리 패널 상태(?sheet=분야&list=세부 분야|all). 프로필에서 돌아오면 패널과 창작자 목록을 다시 연다.
+  const [sheet, setSheet] = useState<SheetView | null>(() => parseSheetView(params.get("sheet"), params.get("list")));
   const moreRef = useRef<HTMLButtonElement>(null);
   const wantFocus = params.get("focus") === "search";
   const ready = demo !== null;
@@ -46,36 +45,24 @@ function HomeView() {
   if (!demo) return null;
 
   // 주소에 검색 상태를 남겨, 프로필에서 돌아왔을 때 결과가 그대로 보이게 한다.
-  function syncUrl(q: string, c: string | null, s: string | null = sub) {
+  function syncUrl(q: string, c: string | null, view: SheetView | null = sheet) {
     const sp = new URLSearchParams();
     if (q.trim()) sp.set("q", q.trim());
     if (c) sp.set("cat", c);
-    if (c && s) sp.set("sub", s);
+    if (view) {
+      sp.set("sheet", view.cat);
+      if (view.list) sp.set("list", view.list);
+    }
     const qs = sp.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   }
 
-  const results = searchCreators(query, cat, sub);
+  const results = searchCreators(query, cat);
   const catLabel = findCategory(cat)?.label;
-  const subLabel = findSubcategory(cat, sub)?.label;
-  const catText = catLabel && (subLabel ? `${catLabel} › ${subLabel}` : catLabel);
   const searching = Boolean(query.trim() || cat);
   const backQs = new URLSearchParams();
   if (query.trim()) backQs.set("q", query.trim());
   if (cat) backQs.set("cat", cat);
-  if (cat && sub) backQs.set("sub", sub);
-
-  /** 패널에서 분야·세부 분야를 고르면: 검색어는 비우고 그 분야로 결과를 보여 준 뒤 결과 제목으로 포커스 */
-  function pickFromSheet(c: string, s: string | null) {
-    setSheetOpen(false);
-    setQuery("");
-    setCat(c);
-    setSub(s);
-    syncUrl("", c, s);
-    const r = document.getElementById("results");
-    r?.focus();
-    r?.scrollIntoView({ block: "center" });
-  }
 
   const { role } = demo;
   const myId = role === "worker" ? ME_WORKER.id : role === "client" ? ME_CLIENT.id : null;
@@ -166,8 +153,7 @@ function HomeView() {
                 className="min-h-11 text-[13px] font-semibold text-accent underline"
                 onClick={() => {
                   setCat(null);
-                  setSub(null);
-                  syncUrl(query, null, null);
+                  syncUrl(query, null);
                 }}
               >
                 분야 선택 해제
@@ -177,9 +163,9 @@ function HomeView() {
               ref={moreRef}
               type="button"
               aria-haspopup="dialog"
-              aria-expanded={sheetOpen}
+              aria-expanded={sheet !== null}
               aria-label="분야 더보기"
-              onClick={() => setSheetOpen(true)}
+              onClick={() => setSheet({ cat: cat ?? CATEGORIES[0].id, list: null })}
               className="inline-flex min-h-11 items-center gap-0.5 text-[13px] font-semibold text-ink-2 hover:text-ink lg:text-sm"
             >
               더보기
@@ -201,8 +187,7 @@ function HomeView() {
                   onClick={() => {
                     const next = on ? null : k.id;
                     setCat(next);
-                    setSub(null);
-                    syncUrl(query, next, null);
+                    syncUrl(query, next);
                   }}
                   className="group flex w-[4.75rem] flex-col items-center gap-1.5 rounded-xl px-1 py-1.5 text-center sm:w-full lg:gap-2.5 lg:rounded-2xl lg:border lg:border-line lg:py-5 lg:hover:border-accent"
                 >
@@ -219,15 +204,20 @@ function HomeView() {
             );
           })}
         </ul>
-        {sheetOpen && (
+        {sheet && (
           <CategorySheet
-            selectedCat={cat}
-            selectedSub={sub}
+            initial={sheet}
+            deals={demo.deals}
+            baseQuery={backQs.toString()}
+            onViewChange={(v) => {
+              setSheet(v);
+              syncUrl(query, cat, v);
+            }}
             onClose={() => {
-              setSheetOpen(false);
+              setSheet(null);
+              syncUrl(query, cat, null);
               moreRef.current?.focus();
             }}
-            onPick={pickFromSheet}
           />
         )}
       </section>
@@ -240,7 +230,7 @@ function HomeView() {
         </h2>
         <p role="status" aria-live="polite" className="mt-0.5 text-[13px] text-ink-2">
           {searching
-            ? `${[query.trim() && `“${query.trim()}”`, catText].filter(Boolean).join(" · ")} — ${results.length}명`
+            ? `${[query.trim() && `“${query.trim()}”`, catLabel].filter(Boolean).join(" · ")} — ${results.length}명`
             : `가상 창작자 ${results.length}명`}
         </p>
 
@@ -253,8 +243,7 @@ function HomeView() {
               onClick={() => {
                 setQuery("");
                 setCat(null);
-                setSub(null);
-                syncUrl("", null, null);
+                syncUrl("", null);
               }}
             >
               검색 조건 지우기

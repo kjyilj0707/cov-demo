@@ -39,7 +39,7 @@ function ProfileView() {
 
   const id = params.get("id");
   const back = new URLSearchParams();
-  for (const k of ["q", "cat", "sub"]) {
+  for (const k of ["q", "cat", "sheet", "list"]) {
     const v = params.get(k);
     if (v) back.set(k, v);
   }
@@ -59,7 +59,7 @@ function ProfileView() {
           href={fromSearch ? (back.toString() ? `/?${back}` : "/") : "/profile/"}
           className="text-sm font-semibold text-ink-2 hover:text-ink"
         >
-          ← {fromSearch ? (back.toString() ? "검색 결과" : "홈") : "내 프로필"}
+          ← {fromSearch ? (back.has("sheet") ? "카테고리" : back.toString() ? "검색 결과" : "홈") : "내 프로필"}
         </Link>
       ) : (
         <div>

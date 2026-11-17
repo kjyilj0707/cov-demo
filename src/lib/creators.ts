@@ -138,6 +138,34 @@ export function findSubcategory(categoryId: string | null | undefined, subId: st
   return subId ? findCategory(categoryId)?.subcategories.find((s) => s.id === subId) : undefined;
 }
 
+/**
+ * 카테고리 패널에서 지금 보는 화면. list가 null이면 세부 분야 목록,
+ * "all"이면 분야 전체 창작자 목록, 그 밖에는 그 세부 분야의 창작자 목록.
+ * 주소에는 ?sheet=분야&list=… 로 남겨 프로필에서 돌아오면 그대로 다시 연다.
+ */
+export interface SheetView {
+  cat: string;
+  list: string | null;
+}
+
+export const SHEET_LIST_ALL = "all";
+
+/** 주소 값에서 패널 상태를 읽는다. 없는 분야면 null, 없는 세부 분야면 세부 분야 목록으로 본다. */
+export function parseSheetView(sheet: string | null, list: string | null): SheetView | null {
+  const k = findCategory(sheet);
+  if (!k) return null;
+  const ok = list === SHEET_LIST_ALL || (list !== null && findSubcategory(k.id, list) !== undefined);
+  return { cat: k.id, list: ok ? list : null };
+}
+
+/** 패널 창작자 목록의 분야·세부 분야 이름. 예: "미디어아트 › 인터랙티브", "미디어아트 전체" */
+export function sheetListLabel(view: SheetView): string {
+  const k = findCategory(view.cat);
+  if (!k) return "";
+  const sub = findSubcategory(view.cat, view.list);
+  return sub ? `${k.label} › ${sub.label}` : `${k.label} 전체`;
+}
+
 /** 홈 검색창 아래 "많이 찾는 키워드" 알약. 누르면 그 낱말로 검색한다. */
 export const POPULAR_KEYWORDS = ["믹싱", "앨범 커버", "공연 포스터", "뮤직비디오", "프로필 사진", "보컬 녹음", "프로젝션"];
 
