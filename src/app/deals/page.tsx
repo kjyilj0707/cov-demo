@@ -30,7 +30,7 @@ import {
   type StatusFilter,
 } from "@/lib/my-deals";
 import { ROLE_PERSONA } from "@/lib/personas";
-import { demoNow, setRole, useDemo, type DemoState } from "@/lib/store";
+import { demoNow, useDemo, type DemoState } from "@/lib/store";
 import { summarize } from "@/lib/stats";
 import type { Deal, Role } from "@/lib/types";
 
@@ -40,7 +40,6 @@ import type { Deal, Role } from "@/lib/types";
  * 흰 바탕 흑백 위주, 파랑(accent)은 검색·새 계약 같은 주요 버튼에만 쓴다. 모서리는 rounded-lg 이하(알약 제외).
  */
 
-const ROLES: Role[] = ["worker", "client", "operator"];
 const btnMain =
   "inline-flex min-h-11 items-center justify-center rounded-lg bg-accent px-4 py-2.5 text-[15px] font-bold text-on-accent";
 const btnLine =
@@ -77,10 +76,7 @@ function MyDealsView() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
-        <h1 className="text-[28px] font-extrabold leading-none tracking-tight lg:text-[40px]">나의 거래</h1>
-        <ViewerSwitch role={role} onChange={() => update({ view: null, status: null, q: null })} />
-      </div>
+      <h1 className="text-[28px] font-extrabold leading-none tracking-tight lg:text-[40px]">나의 거래</h1>
 
       <Tabs tab={tab} onChange={(t) => update({ tab: t === "activity" ? null : t })} />
 
@@ -102,30 +98,6 @@ function MyDealsView() {
         {tab === "account" && <Account role={role} />}
       </div>
     </div>
-  );
-}
-
-/** 보는 사람(시연 역할) 전환. 헤더의 역할 버튼과 같은 저장소 값을 쓴다. */
-function ViewerSwitch({ role, onChange }: { role: Role; onChange: () => void }) {
-  return (
-    <label className="flex min-w-0 items-center gap-2 text-sm">
-      <span className="shrink-0 text-ink-2">보는 사람</span>
-      <select
-        value={role}
-        onChange={(e) => {
-          setRole(e.target.value as Role);
-          // 역할마다 활동 메뉴가 달라서 메뉴·필터·검색어는 처음으로 돌린다
-          onChange();
-        }}
-        className="min-h-11 min-w-0 rounded-lg border border-line bg-card py-2 pl-3 pr-8 text-sm font-semibold text-ink"
-      >
-        {ROLES.map((r) => (
-          <option key={r} value={r}>
-            {ROLE_PERSONA[r].name} · {ROLE_PERSONA[r].title}
-          </option>
-        ))}
-      </select>
-    </label>
   );
 }
 
