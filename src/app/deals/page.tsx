@@ -9,9 +9,6 @@ import { ME_CLIENT, ME_WORKER, ROLE_PERSONA } from "@/lib/personas";
 import { demoNow, useDemo } from "@/lib/store";
 import { dealsFor, summarize } from "@/lib/stats";
 
-/** 나의 거래 화면 안 버튼은 덜 둥글게(2026-11-17 피드백 "좀 더 각지게"). 다른 화면의 btnPrimary는 그대로. */
-const btnSquare = btnPrimary.replace("rounded-xl", "rounded-md");
-
 export default function MyDealsPage() {
   const demo = useDemo();
   const [tab, setTab] = useState<"active" | "done">("active");
@@ -56,11 +53,11 @@ export default function MyDealsPage() {
           </Card>
 
           {role === "operator" ? (
-            <Link href="/admin/" className={`${btnSquare} w-full py-4 text-base`}>
+            <Link href="/admin/" className={`${btnPrimary} w-full py-4 text-base`}>
               운영자 처리 화면 열기
             </Link>
           ) : (
-            <Link href="/new/" className={`${btnSquare} w-full py-4 text-base`}>
+            <Link href="/new/" className={`${btnPrimary} w-full py-4 text-base`}>
               + 새 계약 생성
             </Link>
           )}
@@ -80,7 +77,7 @@ export default function MyDealsPage() {
                 aria-pressed={tab === k}
                 onClick={() => setTab(k)}
                 className={`-mb-px border-b-2 px-1 pb-2 text-sm font-bold ${
-                  tab === k ? "border-ink text-ink" : "border-transparent text-ink-2"
+                  tab === k ? "border-accent text-ink" : "border-transparent text-ink-2"
                 }`}
               >
                 {label}

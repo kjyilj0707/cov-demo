@@ -189,11 +189,11 @@ function HomeView() {
                     setCat(next);
                     syncUrl(query, next);
                   }}
-                  className="group flex w-[4.75rem] flex-col items-center gap-1.5 rounded-xl px-1 py-1.5 text-center sm:w-full lg:gap-2.5 lg:rounded-2xl lg:border lg:border-line lg:py-5 lg:hover:border-accent"
+                  className="group flex w-[4.75rem] flex-col items-center gap-1.5 rounded-xl px-1 py-1.5 text-center sm:w-full lg:gap-2.5 lg:rounded-lg lg:border lg:border-line lg:py-5 lg:hover:border-ink"
                 >
                   <span
-                    className={`inline-flex size-14 items-center justify-center rounded-2xl lg:size-16 ${
-                      on ? "bg-accent text-on-accent" : "bg-accent-soft text-accent group-hover:bg-accent group-hover:text-on-accent"
+                    className={`inline-flex size-14 items-center justify-center rounded-lg lg:size-16 ${
+                      on ? "bg-ink text-on-ink" : "bg-muted text-ink group-hover:bg-ink group-hover:text-on-ink"
                     }`}
                   >
                     <CategoryIcon id={k.id} className="size-7" />

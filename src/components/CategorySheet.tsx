@@ -157,7 +157,7 @@ export function CategorySheet({
                     on ? "bg-paper font-bold text-ink" : "font-medium text-ink-2 hover:text-ink"
                   }`}
                 >
-                  <CategoryIcon id={k.id} className={`hidden size-5 shrink-0 md:block ${on ? "text-accent" : ""}`} />
+                  <CategoryIcon id={k.id} className={`hidden size-5 shrink-0 md:block ${on ? "text-ink" : ""}`} />
                   {k.label}
                 </button>
               );
@@ -205,7 +205,7 @@ export function CategorySheet({
             ) : (
               <>
                 <div className="flex items-center gap-3">
-                  <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-2xl bg-accent-soft text-accent">
+                  <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg bg-muted text-ink">
                     <CategoryIcon id={activeCat.id} className="size-6" />
                   </span>
                   <div className="min-w-0">
