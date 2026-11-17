@@ -9,7 +9,7 @@ import { ME_CLIENT, ME_WORKER, ROLE_PERSONA } from "@/lib/personas";
 import { demoNow, useDemo } from "@/lib/store";
 import { dealsFor, summarize } from "@/lib/stats";
 
-/** 나의 거래 화면 안 버튼은 덜 둥글게(2026-11-17 준엽 피드백 "좀 더 각지게"). 다른 화면의 btnPrimary는 그대로. */
+/** 나의 거래 화면 안 버튼은 덜 둥글게(2026-11-17 피드백 "좀 더 각지게"). 다른 화면의 btnPrimary는 그대로. */
 const btnSquare = btnPrimary.replace("rounded-xl", "rounded-md");
 
 export default function MyDealsPage() {
