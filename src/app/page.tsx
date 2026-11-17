@@ -105,7 +105,7 @@ function HomeView() {
           <button
             type="submit"
             aria-label="검색"
-            className="absolute right-1.5 top-1/2 inline-flex size-11 -translate-y-1/2 lg:right-2 lg:size-12 items-center justify-center rounded-full bg-ink text-on-ink"
+            className="absolute right-1.5 top-1/2 inline-flex size-11 -translate-y-1/2 lg:right-2 lg:size-12 items-center justify-center rounded-full bg-accent text-on-accent"
           >
             <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
               <path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4" />

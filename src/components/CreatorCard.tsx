@@ -24,7 +24,7 @@ export function CreatorCard({ creator, deals, backQuery }: { creator: Creator; d
   const href = `/profile/?id=${encodeURIComponent(creator.id)}&from=search${backQuery ? `&${backQuery}` : ""}`;
   return (
     <li className="h-full">
-      <Link href={href} className="flex h-full flex-col rounded-2xl border border-line bg-card p-4 transition-colors hover:border-accent">
+      <Link href={href} className="flex h-full flex-col rounded-xl border border-line bg-card p-4 transition-colors hover:border-accent">
         <div className="flex items-start gap-3">
           <Monogram name={creator.name} />
           <div className="min-w-0 flex-1">
