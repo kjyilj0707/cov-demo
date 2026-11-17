@@ -63,12 +63,12 @@ export function BudgetRangeField({
 
       <div className="mt-5 px-1">
         <div className="relative h-6" style={{ ["--range-h" as string]: "24px" }}>
-          <div aria-hidden="true" className="absolute inset-x-3 top-1/2 h-1 -translate-y-1/2 rounded-full bg-line">
-            <div className="absolute inset-y-0 bg-ink" style={{ left: `${pct(lo)}%`, right: `${100 - pct(hi)}%` }} />
+          <div aria-hidden="true" className="absolute inset-x-3 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-line">
+            <div className="absolute inset-y-0 bg-accent" style={{ left: `${pct(lo)}%`, right: `${100 - pct(hi)}%` }} />
             {BUDGET_TICKS.map(([i]) => (
               <span
                 key={i}
-                className={`absolute top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full ${i >= lo && i <= hi ? "bg-ink" : "bg-ink-3"}`}
+                className={`absolute top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full ${i >= lo && i <= hi ? "bg-accent" : "bg-ink-3"}`}
                 style={{ left: `${pct(i)}%` }}
               />
             ))}
@@ -114,7 +114,9 @@ export function BudgetRangeField({
               className={`absolute whitespace-nowrap ${i === 0 ? "left-0" : i === BUDGET_LAST ? "right-0" : "-translate-x-1/2"}`}
               style={i === 0 || i === BUDGET_LAST ? undefined : { left: `calc(12px + (100% - 24px) * ${i / BUDGET_LAST})` }}
             >
-              {label}
+              {/* 좁은 화면에서는 양 끝 라벨을 줄여 겹치지 않게 한다 */}
+              <span className="sm:hidden">{i === 0 ? "~10만" : i === BUDGET_LAST ? "500만~" : label}</span>
+              <span className="hidden sm:inline">{label}</span>
             </span>
           ))}
         </div>

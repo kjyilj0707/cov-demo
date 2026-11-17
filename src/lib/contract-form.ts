@@ -17,6 +17,34 @@ export function counterChoices(role: "worker" | "client"): Party[] {
   return role === "worker" ? CLIENT_CHOICES : WORKER_CHOICES;
 }
 
+export interface CounterHit {
+  party: Party;
+  /** 이름 아래 한 줄(창작자는 대표 분야) */
+  sub: string;
+  /** 공연·라이브처럼 지금은 계약할 수 없는 상대 */
+  paused: boolean;
+}
+
+/**
+ * 계약 상대 검색(이름). 이 서비스(시연 데이터)에 있는 사람만 찾는다.
+ * 작업자는 의뢰인을, 의뢰인은 작업자를 찾는다. 공연·라이브 창작자는 결과에 보이되 고를 수 없다.
+ */
+export function searchCounterparts(role: "worker" | "client", query: string): CounterHit[] {
+  const q = query.toLowerCase().replace(/\s/g, "");
+  if (!q) return [];
+  const pool: CounterHit[] =
+    role === "worker"
+      ? CLIENT_CHOICES.map((p) => ({ party: p, sub: "의뢰인", paused: false }))
+      : CREATORS.map((c) => ({ party: { id: c.id, name: c.name }, sub: c.field, paused: !canContractWith(c) }));
+  return pool.filter((h) => h.party.name.toLowerCase().replace(/\s/g, "").includes(q));
+}
+
+/** 1단계 상대 검사: 고르지 않았거나 고를 수 없는 상대면 문장 */
+export function counterError(role: "worker" | "client", id: string): string | null {
+  if (!counterChoices(role).some((c) => c.id === id)) return "계약 상대를 이름으로 검색해서 골라 주세요.";
+  return null;
+}
+
 /** 계약을 아직 열지 않은 분야(공연·라이브)의 창작자인가 */
 export function isPausedCreator(id: string | null | undefined): boolean {
   const c = id ? findCreator(id) : undefined;

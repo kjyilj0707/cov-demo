@@ -5,7 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { btnPrimary, btnSecondary, inputCls } from "@/components/bits";
 import { BudgetRangeField } from "@/components/BudgetRangeField";
+import { PartyPicker } from "@/components/PartyPicker";
 import { RevisionDial } from "@/components/RevisionDial";
+import { WheelPicker } from "@/components/WheelPicker";
 import { emptyTerms } from "@/components/TermsForm";
 import {
   CONTRACT_STEPS,
@@ -14,6 +16,7 @@ import {
   amountRangeError,
   budgetText,
   counterChoices,
+  counterError,
   firstErrorStep,
   isPausedCreator,
   loadDraft,
@@ -151,7 +154,7 @@ function ContractSteps({
     const preset = presetWorker ? findCreator(presetWorker) : undefined;
     const terms: Terms = preset ? { ...emptyTerms(), workType: preset.workType } : emptyTerms();
     return {
-      draft: { v: 1 as const, role, counterId: presetWorker ?? choices[0].id, terms, budget: FULL_BUDGET },
+      draft: { v: 1 as const, role, counterId: presetWorker ?? "", terms, budget: FULL_BUDGET },
       resumed: false,
     };
   });
@@ -168,13 +171,19 @@ function ContractSteps({
   const errRef = useRef<HTMLDivElement>(null);
   const firstRender = useRef(true);
 
-  const selected = choices.find((c) => c.id === counterId) ?? choices[0];
+  const selected = choices.find((c) => c.id === counterId) ?? null;
+  const selectedCreator = selected ? findCreator(selected.id) : undefined;
+  /** 이 단계의 오류(1단계는 상대 검사를 더한다) */
+  const errorsFor = (n: number) => {
+    const ce = n === 1 ? counterError(role, counterId) : null;
+    return [...(ce ? [ce] : []), ...stepErrors(n, t, budget)];
+  };
   const up = <K extends keyof Terms>(k: K, v: Terms[K]) => setT((p) => ({ ...p, [k]: v }));
 
   // 입력이 바뀔 때마다 같은 탭의 sessionStorage에 남긴다(확인하기 페이지로 넘기는 통로)
   useEffect(() => {
-    saveDraft({ v: 1, role, counterId: selected.id, terms: t, budget });
-  }, [role, selected.id, t, budget]);
+    saveDraft({ v: 1, role, counterId, terms: t, budget });
+  }, [role, counterId, t, budget]);
 
   // 단계가 바뀌면 카드 제목으로 포커스(처음 열 때는 건드리지 않는다)
   useEffect(() => {
@@ -194,7 +203,7 @@ function ContractSteps({
   }
 
   function next() {
-    const errs = stepErrors(step, t, budget);
+    const errs = errorsFor(step);
     if (errs.length) {
       setErrors(errs);
       requestAnimationFrame(() => errRef.current?.focus());
@@ -202,13 +211,13 @@ function ContractSteps({
     }
     if (step < LAST_FORM_STEP) return go(step + 1);
     // 마지막 입력 단계: 전체를 다시 보고 확인하기 페이지로
-    const bad = firstErrorStep(t, budget);
+    const bad = counterError(role, counterId) ? 1 : firstErrorStep(t, budget);
     if (bad !== null) {
       go(bad);
-      setErrors(stepErrors(bad, t, budget));
+      setErrors(errorsFor(bad));
       return;
     }
-    saveDraft({ v: 1, role, counterId: selected.id, terms: t, budget });
+    saveDraft({ v: 1, role, counterId, terms: t, budget });
     router.push("/new/review/");
   }
 
@@ -349,14 +358,30 @@ function ContractSteps({
 
             {step === 1 && (
               <>
-                <Item id="counter" label={role === "worker" ? "의뢰인" : "작업자"} required>
-                  <select id="counter" className={inputCls} value={selected.id} onChange={(e) => setCounterId(e.target.value)}>
-                    {choices.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
+                <Item
+                  id="counter"
+                  label={role === "worker" ? "의뢰인" : "작업자"}
+                  required
+                  hint={
+                    role === "worker"
+                      ? "이 서비스에 있는 의뢰인 중에서 찾습니다. 시연판에서는 가상 의뢰인만 있습니다."
+                      : "이 서비스에 있는 작업자 중에서 찾습니다. 공연·라이브 창작자는 아직 계약할 수 없습니다."
+                  }
+                >
+                  <PartyPicker
+                    id="counter"
+                    role={role}
+                    label={role === "worker" ? "의뢰인" : "작업자"}
+                    selected={selected}
+                    selectedSub={role === "worker" ? "의뢰인" : selectedCreator?.field}
+                    describedBy="counter-hint"
+                    onSelect={(p) => {
+                      setCounterId(p?.id ?? "");
+                      // 창작자를 고르면 그 창작자의 대표 작업 유형을 미리 맞춘다(다이얼에서 바꿀 수 있다)
+                      const c = p ? findCreator(p.id) : undefined;
+                      if (role === "client" && c) up("workType", c.workType);
+                    }}
+                  />
                 </Item>
                 <Item id="title" label="프로젝트 제목" required>
                   <input
@@ -368,13 +393,26 @@ function ContractSteps({
                     maxLength={60}
                   />
                 </Item>
-                <Item id="workType" label="작업 유형" required>
-                  <select id="workType" className={inputCls} value={t.workType} onChange={(e) => up("workType", e.target.value as WorkType)}>
-                    {WORK_TYPES.map((w) => (
-                      <option key={w}>{w}</option>
-                    ))}
-                  </select>
-                </Item>
+                <div>
+                  <p id="workType-label" className="mb-2 text-[15px] font-bold">
+                    작업 유형 <Req />
+                  </p>
+                  <div className="flex flex-wrap items-center gap-4">
+                    <WheelPicker
+                      idPrefix="worktype"
+                      mode="listbox"
+                      options={[...WORK_TYPES]}
+                      index={WORK_TYPES.indexOf(t.workType)}
+                      onChange={(i) => up("workType", WORK_TYPES[i] as WorkType)}
+                      labelledBy="workType-label"
+                      className="w-52"
+                    />
+                    <p className="text-sm text-ink-2">
+                      고른 유형: <strong className="text-ink">{t.workType}</strong>
+                      <span className="mt-1 block text-[13px]">위아래로 굴리거나 눌러서 고릅니다.</span>
+                    </p>
+                  </div>
+                </div>
               </>
             )}
 

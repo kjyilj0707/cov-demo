@@ -9,10 +9,12 @@ import {
   budgetIndexFor,
   budgetValueAt,
   counterChoices,
+  counterError,
   firstErrorStep,
   parseDraft,
   parseRevisionText,
   reviewSections,
+  searchCounterparts,
   stepErrors,
   stepRevision,
 } from "./contract-form";
@@ -143,5 +145,34 @@ describe("작성 값 넘기기", () => {
 
   it("의뢰인의 상대 목록에는 공연·라이브 창작자가 없다", () => {
     expect(counterChoices("client").map((c) => c.id)).not.toContain("w-bamhaneul");
+  });
+});
+
+describe("계약 상대 검색(콤보박스)", () => {
+  it("작업자는 의뢰인을 이름으로 찾는다(띄어쓰기·대소문자 무시)", () => {
+    expect(searchCounterparts("worker", "소다").map((h) => h.party.id)).toEqual([ME_CLIENT.id]);
+    expect(searchCounterparts("worker", "은하 수").map((h) => h.party.name)).toEqual(["은하수책방"]);
+  });
+
+  it("빈 검색어는 결과 없음, 없는 이름도 결과 없음", () => {
+    expect(searchCounterparts("worker", "  ")).toEqual([]);
+    expect(searchCounterparts("worker", "없는사람xyz")).toEqual([]);
+    // 작업자끼리는 찾지 않는다
+    expect(searchCounterparts("worker", "새벽녘")).toEqual([]);
+  });
+
+  it("의뢰인은 작업자를 찾고, 공연·라이브 창작자는 보이되 고를 수 없다", () => {
+    const hits = searchCounterparts("client", "밤하늘");
+    expect(hits).toHaveLength(1);
+    expect(hits[0].paused).toBe(true);
+    expect(counterError("client", hits[0].party.id)).not.toBeNull();
+    const ok = searchCounterparts("client", "새벽녘");
+    expect(ok[0].paused).toBe(false);
+    expect(counterError("client", ok[0].party.id)).toBeNull();
+  });
+
+  it("상대를 고르지 않으면 1단계 오류", () => {
+    expect(counterError("worker", "")).toMatch(/검색해서 골라/);
+    expect(counterError("worker", ME_CLIENT.id)).toBeNull();
   });
 });
