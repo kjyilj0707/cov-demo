@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   CATEGORIES,
   CREATORS,
+  canContractWith,
   findProfileTarget,
   findSubcategory,
   parseSheetView,
@@ -114,5 +115,12 @@ describe("카테고리 패널 상태(?sheet=&list=)", () => {
   it("목록 제목", () => {
     expect(sheetListLabel({ cat: "mediaart", list: "interactive" })).toBe("미디어아트 › 인터랙티브");
     expect(sheetListLabel({ cat: "mediaart", list: "all" })).toBe("미디어아트 전체");
+  });
+});
+
+describe("계약을 아직 열지 않는 분야", () => {
+  it("공연·라이브 창작자는 계약 불가, 나머지는 가능", () => {
+    for (const c of CREATORS) expect(canContractWith(c), c.id).toBe(!c.categories.includes("live"));
+    expect(CREATORS.filter((c) => !canContractWith(c)).map((c) => c.id).sort()).toEqual(["w-bamhaneul", "w-noeulbit"]);
   });
 });

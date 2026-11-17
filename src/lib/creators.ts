@@ -320,6 +320,17 @@ export const CREATORS: Creator[] = [
   },
 ];
 
+/**
+ * 계약 만들기를 아직 열지 않는 분야. 공연·라이브는 파일 납품이 없어 계약 흐름과 맞지 않아
+ * 분류가 확정될 때까지 계약을 막는다(2026-11-17 준엽 결정).
+ */
+export const CONTRACT_PAUSED_CATEGORIES = ["live"];
+
+/** 이 창작자와 계약 만들기를 열 수 있는가 */
+export function canContractWith(c: Creator): boolean {
+  return !c.categories.some((id) => CONTRACT_PAUSED_CATEGORIES.includes(id));
+}
+
 /** 검색 비교용: 소문자, 공백·가운뎃점 제거 */
 function norm(s: string): string {
   return s.toLowerCase().replace(/[\s·・.,/()]/g, "");

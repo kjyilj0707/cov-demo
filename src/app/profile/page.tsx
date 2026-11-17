@@ -10,6 +10,7 @@ import {
   CATEGORIES,
   CREATORS,
   DEMO_CLIENTS,
+  canContractWith,
   findProfileTarget,
   pct,
   trustFor,
@@ -162,6 +163,8 @@ function ProfileBody({
   const Heading = headingLevel;
   // 창작자에게 계약을 제안하는 건 의뢰인이다. 지금 의뢰인이 아니면 역할을 바꾸고 넘어간다.
   const canPropose = target.side === "worker" && !(isMe && role === "worker");
+  // 공연·라이브처럼 계약을 아직 열지 않은 분야의 창작자는 버튼 대신 안내를 보여 준다.
+  const contractPaused = c !== undefined && !canContractWith(c);
 
   const profileCard = (
     <Card aria-labelledby="pf-name">
@@ -226,7 +229,14 @@ function ProfileBody({
     </Card>
   );
 
-  const cta = canPropose && (
+  const cta = canPropose && contractPaused ? (
+    <div role="note" className="rounded-2xl border border-line bg-muted p-4 text-center">
+      <p className="font-bold">공연 계약은 준비 중입니다</p>
+      <p className="mt-1 text-[13px] text-ink-2">
+        공연·라이브는 파일 납품이 없어 지금의 계약 절차와 맞지 않습니다. 계약 방식이 정해지면 이곳에서 바로 계약을 만들 수 있습니다.
+      </p>
+    </div>
+  ) : canPropose && (
     <div className="space-y-1.5">
       <button type="button" onClick={onContract} className={`${btnPrimary} w-full py-4 text-base`}>
         이 창작자와 계약 만들기

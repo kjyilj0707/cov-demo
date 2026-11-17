@@ -3,16 +3,16 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
-import { Card, Field, btnPrimary, inputCls } from "@/components/bits";
+import { Card, Field, btnPrimary, btnSecondary, inputCls } from "@/components/bits";
 import { TermsForm, emptyTerms } from "@/components/TermsForm";
-import { CREATORS, findCreator } from "@/lib/creators";
+import { CREATORS, canContractWith, findCreator } from "@/lib/creators";
 import { formatDate, formatWon } from "@/lib/format";
 import { CLIENT_CHOICES, ME_CLIENT, ME_WORKER } from "@/lib/personas";
 import { PAYMENT_ROUTE_LABEL, type Terms } from "@/lib/types";
 import { addDeal, useDemo } from "@/lib/store";
 
-/** 의뢰인이 고를 수 있는 작업자: 홈 검색의 가상 창작자 전부 */
-const WORKER_CHOICES = CREATORS.map((c) => ({ id: c.id, name: c.name }));
+/** 의뢰인이 고를 수 있는 작업자: 홈 검색의 가상 창작자 중 계약을 열어 둔 분야의 창작자(공연·라이브 제외) */
+const WORKER_CHOICES = CREATORS.filter(canContractWith).map((c) => ({ id: c.id, name: c.name }));
 
 export default function NewDealPage() {
   return (
@@ -44,6 +44,28 @@ function NewDealView() {
   }
 
   const isWorker = demo.role === "worker";
+  // 주소를 직접 고쳐 ?worker=공연·라이브 창작자로 들어와도 계약 양식을 열지 않는다.
+  // (화면에서 막는 것일 뿐이다. 실제 서비스에서는 서버도 같은 검사를 해야 한다.)
+  const pausedCreator = !isWorker && presetWorker ? findCreator(presetWorker) : undefined;
+  if (pausedCreator && !canContractWith(pausedCreator)) {
+    return (
+      <div className="space-y-4 py-8 text-center">
+        <h1 className="text-xl font-bold">공연 계약은 준비 중입니다</h1>
+        <p className="text-ink-2">
+          {pausedCreator.name}은(는) 공연·라이브 분야 창작자입니다. 공연은 파일 납품이 없어 지금의 계약 절차와 맞지 않아, 계약
+          방식이 정해질 때까지 계약을 만들 수 없습니다.
+        </p>
+        <div className="flex flex-wrap justify-center gap-2">
+          <Link href={`/profile/?id=${encodeURIComponent(pausedCreator.id)}`} className={btnPrimary}>
+            프로필로 돌아가기
+          </Link>
+          <Link href="/new/" className={btnSecondary}>
+            다른 창작자와 계약 만들기
+          </Link>
+        </div>
+      </div>
+    );
+  }
   const choices = isWorker ? CLIENT_CHOICES : WORKER_CHOICES;
   const selected = choices.find((c) => c.id === counterId) ?? choices[0];
   const presetCreator = !isWorker && presetWorker ? findCreator(presetWorker) : undefined;

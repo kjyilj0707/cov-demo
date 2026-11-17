@@ -19,9 +19,30 @@ const TONE: Record<DealStatus, string> = {
   cancelled: "bg-line text-ink-2",
 };
 
-export function StatusBadge({ deal }: { deal: Deal }) {
+/**
+ * 나의 거래 목록용 흑백 상태 배지(2026-11-17 준엽 피드백 "기본 색깔, 검정색으로").
+ * 분쟁은 놓치면 안 되는 상태라 빨강을, 취소는 끝난 거래라 회색을 그대로 둔다.
+ */
+const TONE_MONO: Record<DealStatus, string> = {
+  proposed: "bg-ink text-on-ink",
+  awaiting_deposit: "bg-ink text-on-ink",
+  deposit_reported: "bg-ink text-on-ink",
+  in_progress: "bg-ink text-on-ink",
+  in_review: "bg-ink text-on-ink",
+  awaiting_payout: "bg-ink text-on-ink",
+  settled: "bg-ink text-on-ink",
+  disputed: TONE.disputed,
+  cancelled: TONE.cancelled,
+};
+
+/** mono: 나의 거래 목록(DealCard)에서만 쓰는 흑백 배지. 거래 상세·운영 화면은 기존 색 그대로. */
+export function StatusBadge({ deal, mono = false }: { deal: Deal; mono?: boolean }) {
   return (
-    <span className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-xs font-semibold ${TONE[deal.status]}`}>
+    <span
+      className={`inline-flex shrink-0 items-center px-2.5 py-1 text-xs font-semibold ${
+        mono ? `rounded-md ${TONE_MONO[deal.status]}` : `rounded-full ${TONE[deal.status]}`
+      }`}
+    >
       {statusLabel(deal)}
     </span>
   );
@@ -93,7 +114,7 @@ export function DealCard({ deal, role, now }: { deal: Deal; role: Role; now: Dat
               {myRole} · {other}
             </p>
           </div>
-          <StatusBadge deal={deal} />
+          <StatusBadge deal={deal} mono />
         </div>
         <dl className="mt-3 grid grid-cols-3 gap-2 text-[13px]">
           <div>
