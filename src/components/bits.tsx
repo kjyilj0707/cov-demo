@@ -70,7 +70,12 @@ export function revisionText(deal: Deal): string {
   return `수정 ${deal.revisionsUsed}/${deal.terms.revisionLimit}`;
 }
 
-export function DealCard({ deal, role, now }: { deal: Deal; role: Role; now: Date }) {
+/**
+ * 나의 거래 목록 카드(나의 거래 화면에서만 쓴다).
+ * side: 이 거래에서 "나"의 자리. 판매·구매 활동처럼 역할과 다른 자리의 거래를 보여 줄 때 넘긴다.
+ */
+export function DealCard({ deal, role: viewRole, now, side }: { deal: Deal; role: Role; now: Date; side?: "worker" | "client" }) {
+  const role: Role = viewRole === "operator" ? "operator" : (side ?? viewRole);
   const other =
     role === "worker"
       ? `의뢰인 ${deal.client.name}`
@@ -84,7 +89,7 @@ export function DealCard({ deal, role, now }: { deal: Deal; role: Role; now: Dat
     <li className="h-full">
       <Link
         href={`/deal/?id=${encodeURIComponent(deal.id)}`}
-        className="block h-full rounded-2xl border border-line bg-card p-4 transition-colors hover:border-accent"
+        className="block h-full rounded-lg border border-line bg-card p-4 transition-colors hover:border-ink"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">

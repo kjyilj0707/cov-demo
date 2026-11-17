@@ -163,5 +163,62 @@ export async function buildSeed(now: Date): Promise<Deal[]> {
     ],
   );
 
-  return [mixing, artwork, session, video, poster];
+  // 나의 거래의 "구매 활동·판매 활동"이 양쪽 다 보이도록, 시연 작업자가 의뢰인인 거래와
+  // 시연 의뢰인이 작업자인 거래를 하나씩 둔다. 둘 다 정산까지 끝나 지금 처리할 일은 없다.
+  const NAMUGEUNEUL: Party = { id: "w-namugeuneul", name: "나무그늘 녹음실" };
+  const DALMURI: Party = { id: "c-dalmuri", name: "카페 달무리" };
+
+  const guideVocal = await run(
+    "demo-voc-5c20",
+    {
+      title: "온결 스튜디오 데모곡 가이드 보컬 녹음",
+      workType: "세션·녹음",
+      amount: 200000,
+      deadline: ymd(day(-20)),
+      revisionLimit: 1,
+      fileFormats: ["WAV"],
+      scope: "데모곡 1곡 가이드 보컬 녹음과 기본 편집. 보컬 2테이크 이내.",
+      paymentRoute: "direct",
+    },
+    NAMUGEUNEUL,
+    ME_WORKER,
+    "worker",
+    40,
+    [
+      ["agree", "client"],
+      [{ type: "report_deposit", depositorName: "온결스튜디오" }, "client"],
+      [{ type: "confirm_received" }, "worker"],
+      [{ type: "submit_delivery", fileNames: ["guide_vocal_take2.wav"] }, "worker"],
+      [{ type: "approve" }, "client"],
+      [{ type: "confirm_settlement" }, "worker"],
+    ],
+  );
+
+  const cafeMusic = await run(
+    "demo-cmp-2f88",
+    {
+      title: "카페 달무리 매장 배경음악 작곡",
+      workType: "작·편곡",
+      amount: 250000,
+      deadline: ymd(day(-12)),
+      revisionLimit: 2,
+      fileFormats: ["WAV", "MP3"],
+      scope: "매장용 어쿠스틱 배경음악 2곡(각 3분 내외) 작곡과 녹음.",
+      paymentRoute: "direct",
+    },
+    ME_CLIENT,
+    DALMURI,
+    "client",
+    35,
+    [
+      ["agree", "worker"],
+      [{ type: "report_deposit", depositorName: "카페달무리" }, "client"],
+      [{ type: "confirm_received" }, "worker"],
+      [{ type: "submit_delivery", fileNames: ["dalmuri_bgm_01.wav", "dalmuri_bgm_02.wav"] }, "worker"],
+      [{ type: "approve" }, "client"],
+      [{ type: "confirm_settlement" }, "worker"],
+    ],
+  );
+
+  return [mixing, artwork, session, video, poster, guideVocal, cafeMusic];
 }
