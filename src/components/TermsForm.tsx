@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Field, btnPrimary, inputCls } from "@/components/bits";
-import { MAX_REVISION_LIMIT, validateTerms } from "@/lib/deal-machine";
+import { MAX_REVISION_LIMIT, WORK_TYPE_DETAIL_MAX, validateTerms } from "@/lib/deal-machine";
 import { FILE_FORMATS, PAYMENT_ROUTE_LABEL, WORK_TYPES, type PaymentRoute, type Terms, type WorkType } from "@/lib/types";
 
 export function emptyTerms(): Terms {
@@ -102,6 +102,20 @@ export function TermsForm({
           ))}
         </select>
       </Field>
+
+      {t.workType === "기타" && (
+        <Field id="workTypeDetail" label="기타 작업 내용" hint={`예: 라이브 음원 편집 (${WORK_TYPE_DETAIL_MAX}자 이내)`}>
+          <input
+            id="workTypeDetail"
+            className={inputCls}
+            value={t.workTypeDetail ?? ""}
+            onChange={(e) => up("workTypeDetail", e.target.value)}
+            maxLength={WORK_TYPE_DETAIL_MAX}
+            aria-describedby="workTypeDetail-hint"
+            required
+          />
+        </Field>
+      )}
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <Field id="amount" label="금액(원)" hint="부가세·수수료는 시연판에서 다루지 않습니다.">

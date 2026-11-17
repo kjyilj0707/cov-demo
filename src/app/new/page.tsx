@@ -28,7 +28,7 @@ import {
   type BudgetRange,
 } from "@/lib/contract-form";
 import { findCreator } from "@/lib/creators";
-import { AUTO_APPROVE_DAYS } from "@/lib/deal-machine";
+import { AUTO_APPROVE_DAYS, WORK_TYPE_DETAIL_MAX } from "@/lib/deal-machine";
 import { formatDate } from "@/lib/format";
 import { demoNow, useDemo } from "@/lib/store";
 import { FILE_FORMATS, PAYMENT_ROUTE_LABEL, WORK_TYPES, type PaymentRoute, type Terms, type WorkType } from "@/lib/types";
@@ -412,6 +412,28 @@ function ContractSteps({
                       <span className="mt-1 block text-[13px]">위아래로 굴리거나 눌러서 고릅니다.</span>
                     </p>
                   </div>
+                  {t.workType === "기타" && (
+                    <div className="mt-4">
+                      <label htmlFor="workTypeDetail" className="mb-2 block text-[15px] font-bold">
+                        기타 작업 내용 <Req />
+                      </label>
+                      <input
+                        id="workTypeDetail"
+                        className={inputCls}
+                        value={t.workTypeDetail ?? ""}
+                        onChange={(e) => up("workTypeDetail", e.target.value)}
+                        placeholder="예: 라이브 음원 편집"
+                        maxLength={WORK_TYPE_DETAIL_MAX}
+                        aria-describedby="workTypeDetail-hint"
+                      />
+                      <p id="workTypeDetail-hint" className="mt-1 flex justify-between gap-3 text-[13px] text-ink-2">
+                        <span>계약서에는 &ldquo;기타 · 적은 내용&rdquo;으로 들어갑니다.</span>
+                        <span aria-hidden="true">
+                          {(t.workTypeDetail ?? "").trim().length}/{WORK_TYPE_DETAIL_MAX}
+                        </span>
+                      </p>
+                    </div>
+                  )}
                 </div>
               </>
             )}

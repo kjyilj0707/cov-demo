@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { btnPrimary } from "@/components/bits";
-import { formatDate, formatDateTime, formatWon } from "@/lib/format";
+import { formatDate, formatDateTime, formatWon, workTypeText } from "@/lib/format";
 import { useDemo } from "@/lib/store";
 import { PAYMENT_ROUTE_LABEL } from "@/lib/types";
 
@@ -65,7 +65,7 @@ function PrintView() {
             [
               ["작업자", deal.worker.name],
               ["의뢰인", deal.client.name],
-              ["작업 유형", t.workType],
+              ["작업 유형", workTypeText(t)],
               ["금액", formatWon(t.amount)],
               ["최종 납기일", formatDate(t.deadline)],
               ["수정 가능 횟수", `${t.revisionLimit}회`],

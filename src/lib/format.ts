@@ -1,4 +1,12 @@
+import type { Terms } from "./types";
+
 const won = new Intl.NumberFormat("ko-KR");
+
+/** 화면용 작업 유형: "기타"에 내용이 있으면 "기타 · 라이브 음원 편집" */
+export function workTypeText(t: Pick<Terms, "workType" | "workTypeDetail">): string {
+  const d = t.workType === "기타" ? t.workTypeDetail?.trim() : "";
+  return d ? `${t.workType} · ${d}` : t.workType;
+}
 
 export function formatWon(n: number): string {
   return `${won.format(n)}원`;

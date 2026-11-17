@@ -23,6 +23,9 @@ export const AUTO_APPROVE_IS_UNDECIDED = true;
 
 export const MAX_REVISION_LIMIT = 10;
 
+/** 작업 유형 "기타"의 작업 내용 글자 수 한도(앞뒤 공백 제외) */
+export const WORK_TYPE_DETAIL_MAX = 30;
+
 export const STATUS_LABEL: Record<DealStatus, string> = {
   proposed: "조건 동의 대기",
   awaiting_deposit: "입금 대기",
@@ -125,6 +128,12 @@ export function validateTerms(t: Terms): string[] {
   const errors: string[] = [];
   if (!t.title || !t.title.trim()) errors.push("프로젝트 제목을 적어 주세요.");
   if (!WORK_TYPES.includes(t.workType)) errors.push("작업 유형을 골라 주세요.");
+  if (t.workType === "기타") {
+    const detail = typeof t.workTypeDetail === "string" ? t.workTypeDetail.trim() : "";
+    if (!detail) errors.push("작업 유형이 기타이면 작업 내용을 적어 주세요.");
+    else if (detail.length > WORK_TYPE_DETAIL_MAX)
+      errors.push(`기타 작업 유형의 내용은 ${WORK_TYPE_DETAIL_MAX}자 이내로 적어 주세요.`);
+  }
   if (!Number.isInteger(t.amount) || t.amount <= 0)
     errors.push("금액은 1원 이상의 정수로 적어 주세요.");
   if (!/^\d{4}-\d{2}-\d{2}$/.test(t.deadline) || Number.isNaN(Date.parse(t.deadline)))
@@ -149,6 +158,10 @@ function normalizeTerms(t: Terms): Terms {
   return {
     title: t.title.trim(),
     workType: t.workType,
+    // "기타"이고 내용이 있을 때만 키를 둔다(없으면 해시 입력에서 빠져 기존 해시와 같다)
+    ...(t.workType === "기타" && typeof t.workTypeDetail === "string" && t.workTypeDetail.trim()
+      ? { workTypeDetail: t.workTypeDetail.trim() }
+      : {}),
     amount: t.amount,
     deadline: t.deadline,
     revisionLimit: t.revisionLimit,

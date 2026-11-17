@@ -45,6 +45,12 @@ export const PAYMENT_ROUTE_LABEL: Record<PaymentRoute, string> = {
 export interface Terms {
   title: string;
   workType: WorkType;
+  /**
+   * 작업 유형이 "기타"일 때 적는 작업 내용(예: "라이브 음원 편집"). 그 밖의 유형에서는 저장하지 않는다.
+   * 비어 있으면 키 자체를 두지 않는다: 해시는 undefined 키를 빼고 계산하므로,
+   * 이 필드가 생기기 전의 거래와 다른 유형의 거래는 해시가 그대로다.
+   */
+  workTypeDetail?: string;
   /** 원 단위 정수 */
   amount: number;
   /** YYYY-MM-DD */

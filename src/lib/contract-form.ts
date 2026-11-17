@@ -2,7 +2,7 @@
 // 예산 범위(budget)는 화면 안에서만 쓰는 값이다. 계약(조건 스냅샷·해시·대금 흐름)에는
 // 지금처럼 terms.amount(확정 금액) 하나만 들어간다.
 import { MAX_REVISION_LIMIT, validateTerms } from "./deal-machine";
-import { daysUntil, formatDate, formatWon } from "./format";
+import { daysUntil, formatDate, formatWon, workTypeText } from "./format";
 import { CREATORS, canContractWith, findCreator } from "./creators";
 import { CLIENT_CHOICES } from "./personas";
 import { FILE_FORMATS, PAYMENT_ROUTE_LABEL, type Party, type Terms } from "./types";
@@ -283,7 +283,7 @@ export function reviewSections(
       rows: [
         { label: counter.label, text: counter.name },
         { label: "프로젝트 제목", text: terms.title.trim() },
-        { label: "작업 유형", text: terms.workType },
+        { label: "작업 유형", text: workTypeText(terms) },
       ],
     },
     {

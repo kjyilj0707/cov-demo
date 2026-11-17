@@ -14,7 +14,7 @@ import {
   statusLabel,
   type ActionType,
 } from "@/lib/deal-machine";
-import { daysUntil, formatDate, formatDateTime, formatWon } from "@/lib/format";
+import { daysUntil, formatDate, formatDateTime, formatWon, workTypeText } from "@/lib/format";
 import { hashTerms } from "@/lib/hash";
 import { OPERATOR_ACCOUNT, depositorNameRule } from "@/lib/personas";
 import { act, demoNow, useDemo } from "@/lib/store";
@@ -328,7 +328,7 @@ function TermsCard({ deal }: { deal: Deal }) {
       <dl className="mt-3 divide-y divide-line text-[15px]">
         {(
           [
-            ["작업 유형", shown.workType],
+            ["작업 유형", workTypeText(shown)],
             ["금액", formatWon(shown.amount)],
             ["최종 납기일", formatDate(shown.deadline)],
             ["수정 가능 횟수", `${shown.revisionLimit}회 (${revisionText(deal)} 사용)`],

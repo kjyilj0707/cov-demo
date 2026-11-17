@@ -13,7 +13,7 @@ import {
   reviewSections,
   type ContractDraft,
 } from "@/lib/contract-form";
-import { formatDate, formatWon } from "@/lib/format";
+import { formatDate, formatWon, workTypeText } from "@/lib/format";
 import { ME_CLIENT, ME_WORKER } from "@/lib/personas";
 import { addDeal, demoNow, useDemo } from "@/lib/store";
 import { PAYMENT_ROUTE_LABEL } from "@/lib/types";
@@ -108,6 +108,7 @@ function ReviewView({ role, now }: { role: "worker" | "client" | "operator"; now
 
   const summary: [string, string][] = [
     ["작업", terms.title.trim()],
+    ["작업 유형", workTypeText(terms)],
     [counterLabel, counter.name],
     ["대금 경로", PAYMENT_ROUTE_LABEL[terms.paymentRoute]],
     ["수정 횟수", `${terms.revisionLimit}회`],
