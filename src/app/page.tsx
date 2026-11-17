@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { CategoryIcon } from "@/components/CategoryIcon";
+import { CategorySheet } from "@/components/CategorySheet";
 import { CreatorCard } from "@/components/CreatorCard";
 import { TERMINAL } from "@/lib/deal-machine";
-import { CATEGORIES, POPULAR_KEYWORDS, searchCreators } from "@/lib/creators";
+import { CATEGORIES, POPULAR_KEYWORDS, findCategory, findSubcategory, searchCreators } from "@/lib/creators";
 import { ME_CLIENT, ME_WORKER } from "@/lib/personas";
 import { useDemo } from "@/lib/store";
 import { dealsFor } from "@/lib/stats";
@@ -26,6 +27,10 @@ function HomeView() {
   const demo = useDemo();
   const [query, setQuery] = useState(params.get("q") ?? "");
   const [cat, setCat] = useState<string | null>(params.get("cat"));
+  // 세부 분야는 고른 분야 안의 것만 받는다(주소를 손으로 고친 경우 대비)
+  const [sub, setSub] = useState<string | null>(() => (findSubcategory(params.get("cat"), params.get("sub")) ? params.get("sub") : null));
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const moreRef = useRef<HTMLButtonElement>(null);
   const wantFocus = params.get("focus") === "search";
   const ready = demo !== null;
 
@@ -41,20 +46,36 @@ function HomeView() {
   if (!demo) return null;
 
   // 주소에 검색 상태를 남겨, 프로필에서 돌아왔을 때 결과가 그대로 보이게 한다.
-  function syncUrl(q: string, c: string | null) {
+  function syncUrl(q: string, c: string | null, s: string | null = sub) {
     const sp = new URLSearchParams();
     if (q.trim()) sp.set("q", q.trim());
     if (c) sp.set("cat", c);
+    if (c && s) sp.set("sub", s);
     const qs = sp.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   }
 
-  const results = searchCreators(query, cat);
-  const catLabel = CATEGORIES.find((k) => k.id === cat)?.label;
+  const results = searchCreators(query, cat, sub);
+  const catLabel = findCategory(cat)?.label;
+  const subLabel = findSubcategory(cat, sub)?.label;
+  const catText = catLabel && (subLabel ? `${catLabel} › ${subLabel}` : catLabel);
   const searching = Boolean(query.trim() || cat);
   const backQs = new URLSearchParams();
   if (query.trim()) backQs.set("q", query.trim());
   if (cat) backQs.set("cat", cat);
+  if (cat && sub) backQs.set("sub", sub);
+
+  /** 패널에서 분야·세부 분야를 고르면: 검색어는 비우고 그 분야로 결과를 보여 준 뒤 결과 제목으로 포커스 */
+  function pickFromSheet(c: string, s: string | null) {
+    setSheetOpen(false);
+    setQuery("");
+    setCat(c);
+    setSub(s);
+    syncUrl("", c, s);
+    const r = document.getElementById("results");
+    r?.focus();
+    r?.scrollIntoView({ block: "center" });
+  }
 
   const { role } = demo;
   const myId = role === "worker" ? ME_WORKER.id : role === "client" ? ME_CLIENT.id : null;
@@ -134,24 +155,41 @@ function HomeView() {
       </section>
 
       <section aria-labelledby="cat-title">
-        <div className="flex items-baseline justify-between">
+        <div className="flex items-center justify-between gap-3">
           <h2 id="cat-title" className="text-base font-bold lg:text-xl">
             분야로 찾기
           </h2>
-          {cat && (
+          <div className="flex items-center gap-3">
+            {cat && (
+              <button
+                type="button"
+                className="min-h-11 text-[13px] font-semibold text-accent underline"
+                onClick={() => {
+                  setCat(null);
+                  setSub(null);
+                  syncUrl(query, null, null);
+                }}
+              >
+                분야 선택 해제
+              </button>
+            )}
             <button
+              ref={moreRef}
               type="button"
-              className="text-[13px] font-semibold text-accent underline"
-              onClick={() => {
-                setCat(null);
-                syncUrl(query, null);
-              }}
+              aria-haspopup="dialog"
+              aria-expanded={sheetOpen}
+              aria-label="분야 더보기"
+              onClick={() => setSheetOpen(true)}
+              className="inline-flex min-h-11 items-center gap-0.5 text-[13px] font-semibold text-ink-2 hover:text-ink lg:text-sm"
             >
-              분야 선택 해제
+              더보기
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 6l6 6-6 6" />
+              </svg>
             </button>
-          )}
+          </div>
         </div>
-        <ul className="-mx-4 mt-3 flex gap-1 overflow-x-auto px-4 pb-2 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-8 sm:px-0 lg:mt-4 lg:gap-3">
+        <ul className="-mx-4 mt-3 flex gap-1 overflow-x-auto px-4 pb-2 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-9 sm:px-0 lg:mt-4 lg:gap-3">
           {CATEGORIES.map((k) => {
             const on = cat === k.id;
             return (
@@ -163,7 +201,8 @@ function HomeView() {
                   onClick={() => {
                     const next = on ? null : k.id;
                     setCat(next);
-                    syncUrl(query, next);
+                    setSub(null);
+                    syncUrl(query, next, null);
                   }}
                   className="group flex w-[4.75rem] flex-col items-center gap-1.5 rounded-xl px-1 py-1.5 text-center sm:w-full lg:gap-2.5 lg:rounded-2xl lg:border lg:border-line lg:py-5 lg:hover:border-accent"
                 >
@@ -180,6 +219,17 @@ function HomeView() {
             );
           })}
         </ul>
+        {sheetOpen && (
+          <CategorySheet
+            selectedCat={cat}
+            selectedSub={sub}
+            onClose={() => {
+              setSheetOpen(false);
+              moreRef.current?.focus();
+            }}
+            onPick={pickFromSheet}
+          />
+        )}
       </section>
 
       <section aria-labelledby="results-title">
@@ -190,7 +240,7 @@ function HomeView() {
         </h2>
         <p role="status" aria-live="polite" className="mt-0.5 text-[13px] text-ink-2">
           {searching
-            ? `${[query.trim() && `“${query.trim()}”`, catLabel].filter(Boolean).join(" · ")} — ${results.length}명`
+            ? `${[query.trim() && `“${query.trim()}”`, catText].filter(Boolean).join(" · ")} — ${results.length}명`
             : `가상 창작자 ${results.length}명`}
         </p>
 
@@ -203,7 +253,8 @@ function HomeView() {
               onClick={() => {
                 setQuery("");
                 setCat(null);
-                syncUrl("", null);
+                setSub(null);
+                syncUrl("", null, null);
               }}
             >
               검색 조건 지우기

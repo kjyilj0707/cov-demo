@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CATEGORIES, CREATORS, findProfileTarget, searchCreators } from "./creators";
+import { CATEGORIES, CREATORS, findProfileTarget, findSubcategory, searchCreators } from "./creators";
 import { ME_CLIENT, ME_WORKER } from "./personas";
 
 describe("creators 정적 데이터", () => {
@@ -12,6 +12,19 @@ describe("creators 정적 데이터", () => {
 
   it("카테고리마다 창작자가 한 명 이상 있다", () => {
     for (const k of CATEGORIES) expect(searchCreators("", k.id).length).toBeGreaterThan(0);
+  });
+
+  it("세부 분야 id는 분야 안에서 겹치지 않고, 세부 분야마다 창작자가 한 명 이상 있다", () => {
+    for (const k of CATEGORIES) {
+      const subIds = k.subcategories.map((s) => s.id);
+      expect(new Set(subIds).size, k.id).toBe(subIds.length);
+      for (const s of k.subcategories) expect(searchCreators("", k.id, s.id).length, `${k.id}/${s.id}`).toBeGreaterThan(0);
+    }
+  });
+
+  it("공연·라이브는 세션·녹음 바로 뒤에 있다", () => {
+    const ids = CATEGORIES.map((k) => k.id);
+    expect(ids.indexOf("live")).toBe(ids.indexOf("session") + 1);
   });
 });
 
@@ -32,6 +45,29 @@ describe("searchCreators", () => {
 
   it("키워드와 카테고리를 함께 쓰면 둘 다 맞아야 한다", () => {
     expect(searchCreators("포스터", "artwork").map((c) => c.id)).toEqual(["w-guruemdari"]);
+  });
+
+  it("\"공연\"·\"라이브\"는 공연·라이브 창작자가 먼저 나온다", () => {
+    for (const q of ["공연", "라이브", "DJ"]) {
+      const r = searchCreators(q, null);
+      const liveCount = searchCreators("", "live").length;
+      expect(r.slice(0, liveCount).every((c) => c.categories.includes("live")), q).toBe(true);
+    }
+  });
+
+  it("사진 분야는 \"공연 촬영\"으로 찾는다", () => {
+    expect(searchCreators("공연 촬영", null).map((c) => c.id)).toContain("w-binmoeum");
+  });
+
+  it("세부 분야는 분야 공통 키워드가 아니라 창작자 글로 거른다", () => {
+    expect(searchCreators("", "live", "dj").map((c) => c.id)).toEqual(["w-bamhaneul"]);
+    expect(searchCreators("", "live", "live-session").map((c) => c.id)).toEqual(["w-noeulbit"]);
+    expect(searchCreators("", "design", "logo").map((c) => c.id)).toEqual(["w-jongibihaeng"]);
+  });
+
+  it("다른 분야의 세부 분야 id는 무시한다", () => {
+    expect(findSubcategory("photo", "dj")).toBeUndefined();
+    expect(searchCreators("", "photo", "dj")).toEqual(searchCreators("", "photo"));
   });
 
   it("맞는 게 없으면 빈 목록", () => {

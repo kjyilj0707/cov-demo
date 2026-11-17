@@ -39,7 +39,7 @@ function ProfileView() {
 
   const id = params.get("id");
   const back = new URLSearchParams();
-  for (const k of ["q", "cat"]) {
+  for (const k of ["q", "cat", "sub"]) {
     const v = params.get(k);
     if (v) back.set(k, v);
   }

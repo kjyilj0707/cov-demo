@@ -4,6 +4,17 @@ import { ME_CLIENT, ME_WORKER, OTHER_CLIENT } from "./personas";
 import { trustProfile } from "./stats";
 import type { Deal, Party, WorkType } from "./types";
 
+/** 분야 안의 세부 분야(카테고리 더보기 패널의 오른쪽 목록) */
+export interface Subcategory {
+  id: string;
+  label: string;
+  /**
+   * 세부 분야 검색 낱말. 창작자 자신의 글(이름·대표 분야·소개·키워드)에 이 중 하나라도 들어 있으면
+   * 그 세부 분야로 본다. 분야 공통 키워드는 비교에 넣지 않는다(넣으면 분야 안 모든 창작자가 걸린다).
+   */
+  keywords: string[];
+}
+
 export interface Category {
   id: string;
   label: string;
@@ -11,18 +22,121 @@ export interface Category {
   blurb: string;
   /** 검색어가 이 낱말들과 맞으면 이 분야로 본다 */
   keywords: string[];
+  subcategories: Subcategory[];
 }
 
+// 공연·라이브(live)는 2026-11-17 팀 회의에서 새로 만든 분야이며 분류는 아직 확정 전이다.
+// 공연은 파일 납품이 없어 계약 흐름(WORK_TYPES)과 맞지 않으므로 검색·분야 화면에서만 쓴다.
 export const CATEGORIES: Category[] = [
-  { id: "mixing", label: "믹싱·마스터링", blurb: "음원 완성도 다듬기", keywords: ["믹싱", "마스터링", "음원", "사운드"] },
-  { id: "session", label: "세션·녹음", blurb: "연주·보컬 녹음", keywords: ["세션", "녹음", "드럼", "베이스", "기타", "보컬"] },
-  { id: "compose", label: "작·편곡", blurb: "곡 만들기·편곡", keywords: ["작곡", "편곡", "작·편곡", "현악", "피아노"] },
-  { id: "artwork", label: "앨범 아트워크", blurb: "재킷·커버 그림", keywords: ["앨범", "아트워크", "커버", "재킷", "일러스트"] },
-  { id: "design", label: "디자인", blurb: "포스터·로고·굿즈", keywords: ["디자인", "포스터", "로고", "타이포", "굿즈", "브랜딩"] },
-  { id: "photo", label: "사진", blurb: "프로필·공연 촬영", keywords: ["사진", "촬영", "프로필", "공연"] },
-  { id: "video", label: "영상", blurb: "뮤직비디오·홍보 영상", keywords: ["영상", "뮤직비디오", "편집", "홍보", "숏폼"] },
-  { id: "mediaart", label: "미디어아트", blurb: "프로젝션·인터랙티브", keywords: ["미디어아트", "프로젝션", "인터랙티브", "전시", "모션"] },
+  {
+    id: "mixing",
+    label: "믹싱·마스터링",
+    blurb: "음원 완성도 다듬기",
+    keywords: ["믹싱", "마스터링", "음원", "사운드"],
+    subcategories: [
+      { id: "mix", label: "믹싱", keywords: ["믹싱"] },
+      { id: "master", label: "마스터링", keywords: ["마스터링"] },
+      { id: "tuning", label: "보정(튠·타이밍)", keywords: ["보정", "튠", "타이밍", "피치"] },
+    ],
+  },
+  {
+    id: "session",
+    label: "세션·녹음",
+    blurb: "연주·보컬 녹음",
+    keywords: ["세션", "녹음", "드럼", "베이스", "기타", "보컬"],
+    subcategories: [
+      { id: "instrument", label: "악기 세션", keywords: ["악기", "드럼", "베이스", "기타", "건반"] },
+      { id: "vocal", label: "보컬 녹음·디렉팅", keywords: ["보컬", "디렉팅"] },
+      { id: "narration", label: "내레이션", keywords: ["내레이션", "성우"] },
+    ],
+  },
+  {
+    id: "live",
+    label: "공연·라이브",
+    blurb: "DJ·클럽·라이브 무대",
+    keywords: ["공연", "라이브", "DJ", "디제이", "클럽", "행사"],
+    subcategories: [
+      { id: "dj", label: "DJ", keywords: ["DJ", "디제이"] },
+      { id: "club", label: "클럽 공연", keywords: ["클럽"] },
+      { id: "live-session", label: "라이브 세션 연주", keywords: ["라이브 세션", "세션 연주", "밴드"] },
+      { id: "event", label: "행사 공연", keywords: ["행사", "축제", "파티"] },
+    ],
+  },
+  {
+    id: "compose",
+    label: "작·편곡",
+    blurb: "곡 만들기·편곡",
+    keywords: ["작곡", "편곡", "작·편곡", "현악", "피아노"],
+    subcategories: [
+      { id: "composing", label: "작곡", keywords: ["작곡", "배경음악"] },
+      { id: "arranging", label: "편곡", keywords: ["편곡"] },
+      { id: "topline", label: "탑라인", keywords: ["탑라인", "멜로디"] },
+    ],
+  },
+  {
+    id: "artwork",
+    label: "앨범 아트워크",
+    blurb: "재킷·커버 그림",
+    keywords: ["앨범", "아트워크", "커버", "재킷", "일러스트"],
+    subcategories: [
+      { id: "cover", label: "커버 일러스트", keywords: ["커버", "일러스트"] },
+      { id: "jacket", label: "재킷 디자인", keywords: ["재킷", "패키지"] },
+    ],
+  },
+  {
+    id: "design",
+    label: "디자인",
+    blurb: "포스터·로고·굿즈",
+    keywords: ["디자인", "포스터", "로고", "타이포", "굿즈", "브랜딩"],
+    subcategories: [
+      { id: "poster", label: "포스터", keywords: ["포스터"] },
+      { id: "logo", label: "로고", keywords: ["로고", "브랜딩"] },
+      { id: "goods", label: "굿즈", keywords: ["굿즈", "머천다이즈"] },
+    ],
+  },
+  {
+    id: "photo",
+    label: "사진",
+    blurb: "프로필·공연 촬영",
+    // "공연"만 두면 검색어 "공연"이 사진 분야로 잡혀서 "공연 촬영"으로 좁혔다.
+    keywords: ["사진", "촬영", "프로필", "공연 촬영"],
+    subcategories: [
+      { id: "profile-photo", label: "프로필", keywords: ["프로필"] },
+      { id: "stage-photo", label: "공연 현장", keywords: ["공연 촬영", "현장"] },
+    ],
+  },
+  {
+    id: "video",
+    label: "영상",
+    blurb: "뮤직비디오·홍보 영상",
+    keywords: ["영상", "뮤직비디오", "편집", "홍보", "숏폼"],
+    subcategories: [
+      { id: "mv", label: "뮤직비디오", keywords: ["뮤직비디오"] },
+      { id: "live-clip", label: "라이브 클립", keywords: ["라이브 클립", "공연 영상"] },
+      { id: "shortform", label: "숏폼", keywords: ["숏폼", "쇼츠", "릴스"] },
+    ],
+  },
+  {
+    id: "mediaart",
+    label: "미디어아트",
+    blurb: "프로젝션·인터랙티브",
+    keywords: ["미디어아트", "프로젝션", "인터랙티브", "전시", "모션"],
+    subcategories: [
+      { id: "projection", label: "프로젝션", keywords: ["프로젝션", "매핑"] },
+      { id: "vj", label: "VJ", keywords: ["VJ", "브이제이"] },
+      { id: "interactive", label: "인터랙티브", keywords: ["인터랙티브", "센서"] },
+    ],
+  },
 ];
+
+export function findCategory(id: string | null | undefined): Category | undefined {
+  return id ? CATEGORIES.find((k) => k.id === id) : undefined;
+}
+
+/** 분야 안의 세부 분야. 분야가 다르거나 없으면 undefined */
+export function findSubcategory(categoryId: string | null | undefined, subId: string | null | undefined): Subcategory | undefined {
+  return subId ? findCategory(categoryId)?.subcategories.find((s) => s.id === subId) : undefined;
+}
 
 /** 홈 검색창 아래 "많이 찾는 키워드" 알약. 누르면 그 낱말로 검색한다. */
 export const POPULAR_KEYWORDS = ["믹싱", "앨범 커버", "공연 포스터", "뮤직비디오", "프로필 사진", "보컬 녹음", "프로젝션"];
@@ -59,7 +173,7 @@ export const CREATORS: Creator[] = [
     id: "w-saebyeok",
     name: "새벽녘 사운드랩",
     field: "믹싱·마스터링",
-    intro: "어쿠스틱·발라드 음원의 따뜻한 질감을 살리는 믹싱을 합니다.",
+    intro: "어쿠스틱·발라드 음원의 따뜻한 질감을 살리는 믹싱을 합니다. 보컬 튠·타이밍 보정도 함께 해요.",
     categories: ["mixing"],
     keywords: ["어쿠스틱", "발라드", "믹싱", "마스터링"],
     workType: "믹싱·마스터링",
@@ -86,10 +200,31 @@ export const CREATORS: Creator[] = [
     staticTrust: { completed: 12, responseRate: 0.88, recontractRate: 0.33 },
   },
   {
+    id: "w-bamhaneul",
+    name: "밤하늘 레코드",
+    field: "공연·라이브 (DJ·클럽)",
+    intro: "클럽 파티와 행사 DJ 공연을 합니다. 하우스·디스코 셋을 자리 분위기에 맞춰 짜 드려요.",
+    categories: ["live"],
+    keywords: ["DJ", "클럽", "파티", "하우스"],
+    // 공연은 계약 흐름(WORK_TYPES)에 맞는 유형이 아직 없어 "기타"로 둔다(분류 확정 전).
+    workType: "기타",
+    staticTrust: { completed: 18, responseRate: 0.93, recontractRate: 0.52 },
+  },
+  {
+    id: "w-noeulbit",
+    name: "노을빛 세션밴드",
+    field: "공연·라이브 (라이브 세션 밴드)",
+    intro: "축제·행사 무대와 클럽 공연에서 보컬 뒤를 받치는 라이브 세션 연주를 합니다.",
+    categories: ["live"],
+    keywords: ["라이브 세션", "밴드", "축제", "클럽 공연"],
+    workType: "기타",
+    staticTrust: { completed: 8, responseRate: 0.89, recontractRate: 0.38 },
+  },
+  {
     id: "w-mulgyeol",
     name: "물결음표",
     field: "작·편곡 (현악·피아노)",
-    intro: "현악과 피아노 편곡, 짧은 영상용 배경 음악 작곡을 합니다.",
+    intro: "현악과 피아노 편곡, 짧은 영상용 배경 음악 작곡, 보컬 탑라인 작업을 합니다.",
     categories: ["compose"],
     keywords: ["현악", "피아노", "편곡", "배경음악"],
     workType: "작·편곡",
@@ -131,7 +266,7 @@ export const CREATORS: Creator[] = [
     field: "사진 (프로필·공연)",
     intro: "아티스트 프로필 사진과 공연 현장 사진을 찍습니다.",
     categories: ["photo"],
-    keywords: ["프로필", "공연", "촬영", "사진"],
+    keywords: ["프로필", "공연 촬영", "사진"],
     workType: "사진",
     staticTrust: { completed: 40, responseRate: 0.91, recontractRate: 0.6 },
   },
@@ -139,7 +274,7 @@ export const CREATORS: Creator[] = [
     id: "w-neujeunohu",
     name: "늦은오후 필름",
     field: "영상 (뮤직비디오·홍보)",
-    intro: "저예산 뮤직비디오 기획·촬영·편집과 홍보용 짧은 영상을 만듭니다.",
+    intro: "저예산 뮤직비디오 기획·촬영·편집과 홍보용 짧은 영상, 라이브 클립을 만듭니다.",
     categories: ["video"],
     keywords: ["뮤직비디오", "편집", "숏폼", "홍보 영상"],
     workType: "영상",
@@ -149,7 +284,7 @@ export const CREATORS: Creator[] = [
     id: "w-byeolgaru",
     name: "별가루 미디어랩",
     field: "미디어아트 (프로젝션·인터랙티브)",
-    intro: "공연 무대 프로젝션과 전시용 인터랙티브 영상을 만듭니다.",
+    intro: "공연 무대 프로젝션과 VJ, 전시용 인터랙티브 영상을 만듭니다.",
     categories: ["mediaart", "video"],
     keywords: ["프로젝션", "인터랙티브", "전시", "모션그래픽"],
     workType: "기타",
@@ -162,21 +297,50 @@ function norm(s: string): string {
   return s.toLowerCase().replace(/[\s·・.,/()]/g, "");
 }
 
-/** 키워드(자유 입력)와 분야(카테고리 id)로 창작자를 거른다. 둘 다 비면 전부. */
-export function searchCreators(query: string, categoryId: string | null, list: Creator[] = CREATORS): Creator[] {
+/** 창작자 자신의 글(분야 공통 키워드 제외). 세부 분야 비교에 쓴다. */
+function ownText(c: Creator): string {
+  return norm([c.name, c.field, c.intro, ...c.keywords].join(" "));
+}
+
+/** 이 창작자가 세부 분야에 해당하는가: 세부 분야 낱말 중 하나라도 창작자 글에 있으면 해당 */
+export function matchesSubcategory(c: Creator, sub: Subcategory): boolean {
+  const own = ownText(c);
+  return sub.keywords.some((k) => own.includes(norm(k)));
+}
+
+/**
+ * 키워드(자유 입력)·분야(카테고리 id)·세부 분야(id)로 창작자를 거른다. 모두 비면 전부.
+ * 검색어가 어떤 분야의 이름이나 키워드와 똑같으면(예: "공연" → 공연·라이브) 그 분야 창작자를 앞에 둔다.
+ */
+export function searchCreators(
+  query: string,
+  categoryId: string | null,
+  subId: string | null = null,
+  list: Creator[] = CREATORS,
+): Creator[] {
   const words = query
     .split(/\s+/)
     .map(norm)
     .filter(Boolean);
-  return list.filter((c) => {
+  const sub = findSubcategory(categoryId, subId);
+  const hits = list.filter((c) => {
     if (categoryId && !c.categories.includes(categoryId)) return false;
+    if (sub && !matchesSubcategory(c, sub)) return false;
     if (words.length === 0) return true;
     const catText = c.categories
-      .map((id) => CATEGORIES.find((k) => k.id === id))
+      .map((id) => findCategory(id))
       .flatMap((k) => (k ? [k.label, ...k.keywords] : []));
     const hay = norm([c.name, c.field, c.intro, ...c.keywords, ...catText].join(" "));
     return words.every((w) => hay.includes(w));
   });
+  if (words.length === 0) return hits;
+  const exactCats = new Set(
+    CATEGORIES.filter((k) => [k.label, ...k.keywords].some((t) => words.includes(norm(t)))).map((k) => k.id),
+  );
+  if (exactCats.size === 0) return hits;
+  const rank = (c: Creator) => (c.categories.some((id) => exactCats.has(id)) ? 0 : 1);
+  // Array.prototype.sort는 안정 정렬이라 같은 순위 안에서는 원래 순서가 유지된다.
+  return [...hits].sort((a, b) => rank(a) - rank(b));
 }
 
 export function findCreator(id: string): Creator | undefined {
