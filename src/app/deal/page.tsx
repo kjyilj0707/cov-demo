@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import ActionPanel from "@/components/ActionPanel";
 import { Card, StatusBadge, revisionText } from "@/components/bits";
+import { InvitePanel } from "@/components/InvitePanel";
 import { TermsForm } from "@/components/TermsForm";
 import {
   ACTION_LABEL,
@@ -30,7 +31,11 @@ export default function DealPage() {
 }
 
 function DealView() {
-  const id = useSearchParams().get("id") ?? "";
+  const params = useSearchParams();
+  const id = params.get("id") ?? "";
+  // ?invite=1: 초대 링크로 들어온 상대, ?new=1: 방금 초안을 만든 사람
+  const invited = params.get("invite") === "1";
+  const justCreated = params.get("new") === "1";
   const demo = useDemo();
   const [editing, setEditing] = useState(false);
   const [editError, setEditError] = useState("");
@@ -130,8 +135,9 @@ function DealView() {
         </div>
 
         <aside aria-label="지금 상황과 할 일" className="contents lg:sticky lg:top-36 lg:block lg:space-y-4">
-          <div className="order-1">
+          <div className="order-1 space-y-3">
             <NowBox deal={deal} role={role} now={now} />
+            <InvitePanel deal={deal} role={role} invited={invited} justCreated={justCreated} />
           </div>
 
           <div className="no-print order-8 sticky bottom-16 md:bottom-0 z-20 -mx-4 border-t border-line bg-card/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border lg:static lg:z-auto lg:bg-card lg:p-4 lg:backdrop-blur-none">

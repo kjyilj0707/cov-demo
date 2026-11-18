@@ -1,16 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { Card, btnPrimary } from "@/components/bits";
+import { Card } from "@/components/bits";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { Monogram } from "@/components/CreatorCard";
 import {
   CATEGORIES,
   CREATORS,
   DEMO_CLIENTS,
-  canContractWith,
   findProfileTarget,
   pct,
   trustFor,
@@ -33,7 +32,6 @@ export default function ProfilePage() {
 
 function ProfileView() {
   const params = useSearchParams();
-  const router = useRouter();
   const demo = useDemo();
   if (!demo) return null;
   const { role } = demo;
@@ -72,7 +70,7 @@ function ProfileView() {
       {id && !target ? (
         <Card>
           <h1 className="text-lg font-bold">프로필을 찾을 수 없습니다</h1>
-          <p className="mt-1 text-sm text-ink-2">홈에서 다시 검색해 주세요.</p>
+          <p className="mt-1 text-sm text-ink-2">주소를 확인하거나 내 프로필로 돌아가 주세요.</p>
         </Card>
       ) : !target ? (
         <TwoCol
@@ -98,11 +96,6 @@ function ProfileView() {
           isMe={isMe}
           headingLevel={viewingOther ? "h1" : "h2"}
           deals={demo.deals}
-          onContract={() => {
-            if (role !== "client") setRole("client");
-            router.push(`/new/?worker=${encodeURIComponent(target.party.id)}`);
-          }}
-          role={role}
           leftTop={viewingOther ? null : <PositionSwitch role={role} />}
           rightBottom={<OtherProfiles currentId={target.party.id} />}
         />
@@ -144,8 +137,6 @@ function ProfileBody({
   isMe,
   headingLevel,
   deals,
-  onContract,
-  role,
   leftTop,
   rightBottom,
 }: {
@@ -153,18 +144,14 @@ function ProfileBody({
   isMe: boolean;
   headingLevel: "h1" | "h2";
   deals: Parameters<typeof trustFor>[1];
-  onContract: () => void;
-  role: Role;
   leftTop: React.ReactNode;
   rightBottom: React.ReactNode;
 }) {
   const t = trustFor(target, deals);
   const c = target.creator;
   const Heading = headingLevel;
-  // 창작자에게 계약을 제안하는 건 의뢰인이다. 지금 의뢰인이 아니면 역할을 바꾸고 넘어간다.
-  const canPropose = target.side === "worker" && !(isMe && role === "worker");
-  // 공연·라이브처럼 계약을 아직 열지 않은 분야의 창작자는 버튼 대신 안내를 보여 준다.
-  const contractPaused = c !== undefined && !canContractWith(c);
+  // 프로필에서 "이 창작자와 계약 만들기"로 넘어가던 버튼은 2026-11-18 뺐다.
+  // 계약 상대는 서비스 안에서 고르지 않고 초대 링크로 부른다(창작자 탐색은 2단계 매칭 기능).
 
   const profileCard = (
     <Card aria-labelledby="pf-name">
@@ -229,24 +216,6 @@ function ProfileBody({
     </Card>
   );
 
-  const cta = canPropose && contractPaused ? (
-    <div role="note" className="rounded-2xl border border-line bg-muted p-4 text-center">
-      <p className="font-bold">공연 계약은 준비 중입니다</p>
-      <p className="mt-1 text-[13px] text-ink-2">
-        공연·라이브는 파일 납품이 없어 지금의 계약 절차와 맞지 않습니다. 계약 방식이 정해지면 이곳에서 바로 계약을 만들 수 있습니다.
-      </p>
-    </div>
-  ) : canPropose && (
-    <div className="space-y-1.5">
-      <button type="button" onClick={onContract} className={`${btnPrimary} w-full py-4 text-base`}>
-        이 창작자와 계약 만들기
-      </button>
-      {role !== "client" && (
-        <p className="text-center text-[13px] text-ink-2">누르면 의뢰인 역할로 바뀌고 계약 만들기로 넘어갑니다.</p>
-      )}
-    </div>
-  );
-
   const defCard = (
     <Card aria-labelledby="pf-def">
       <h2 id="pf-def" className="text-base font-bold">
@@ -277,7 +246,6 @@ function ProfileBody({
         <>
           {leftTop}
           {profileCard}
-          {cta}
         </>
       }
       right={

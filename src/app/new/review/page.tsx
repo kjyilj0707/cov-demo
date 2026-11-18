@@ -6,9 +6,9 @@ import { useRef, useState } from "react";
 import {
   allErrors,
   clearDraft,
-  counterChoices,
+  counterNameError,
   firstErrorStep,
-  isPausedCreator,
+  invitedParty,
   loadDraft,
   reviewSections,
   type ContractDraft,
@@ -24,7 +24,8 @@ import { PAYMENT_ROUTE_LABEL } from "@/lib/types";
  */
 const btnBlack = "inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-ink px-4 text-base font-bold text-on-ink";
 const btnLine = "inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-ink bg-card px-4 text-[15px] font-bold text-ink";
-const NOTE = "동의 요청을 보내면, 상대가 동의한 뒤에는 조건을 바꿀 수 없습니다. 동의하면 조건이 잠기고 해시값과 동의 시각이 기록됩니다.";
+const NOTE =
+  "초안을 만들면 상대에게 보낼 초대 링크가 나옵니다. 상대가 링크로 들어와 동의하면 조건이 잠기고 해시값과 동의 시각이 기록되며, 그 뒤에는 조건을 바꿀 수 없습니다.";
 
 export default function ReviewPage() {
   const demo = useDemo();
@@ -70,9 +71,9 @@ function ReviewView({ role, now }: { role: "worker" | "client" | "operator"; now
         cta="계약 만들기로"
       />
     );
-  const counter = counterChoices(draft.role).find((c) => c.id === draft.counterId);
-  if (!counter || (draft.role === "client" && isPausedCreator(draft.counterId)))
-    return <Notice title="계약 상대를 다시 골라 주세요" body="고른 상대와는 지금 계약을 만들 수 없습니다." href="/new/?step=1" cta="상대 고르기" />;
+  if (counterNameError(draft.counterName))
+    return <Notice title="상대를 부를 이름을 적어 주세요" body="첫 단계에서 상대 이름을 적어야 초대 링크를 만들 수 있습니다." href="/new/?step=1" cta="이름 적으러 가기" />;
+  const counter = invitedParty(draft.role, draft.counterName);
   const bad = firstErrorStep(draft.terms, draft.budget);
   if (bad !== null || allErrors(draft.terms, draft.budget).length)
     return (
@@ -94,8 +95,8 @@ function ReviewView({ role, now }: { role: "worker" | "client" | "operator"; now
     sending.current = true;
     const r = addDeal({
       terms,
-      worker: draft!.role === "worker" ? ME_WORKER : counter!,
-      client: draft!.role === "worker" ? counter! : ME_CLIENT,
+      worker: draft!.role === "worker" ? ME_WORKER : counter,
+      client: draft!.role === "worker" ? counter : ME_CLIENT,
     });
     if (!r.ok) {
       sending.current = false;
@@ -103,7 +104,8 @@ function ReviewView({ role, now }: { role: "worker" | "client" | "operator"; now
       return;
     }
     clearDraft();
-    router.push(`/deal/?id=${encodeURIComponent(r.id!)}`);
+    // 거래 화면에서 초대 링크를 바로 보여 준다(?new=1이면 "초안을 만들었습니다" 안내를 덧붙인다)
+    router.push(`/deal/?id=${encodeURIComponent(r.id!)}&new=1`);
   }
 
   const summary: [string, string][] = [
@@ -197,7 +199,7 @@ function ReviewView({ role, now }: { role: "worker" | "client" | "operator"; now
           )}
           <div className="mt-5 hidden md:block lg:hidden">
             <button type="button" onClick={send} className={btnBlack}>
-              이 내용으로 동의 요청 보내기
+              초안 만들고 초대 링크 받기
             </button>
           </div>
         </div>
@@ -223,7 +225,7 @@ function ReviewView({ role, now }: { role: "worker" | "client" | "operator"; now
                 ← 계속 수정하기
               </Link>
               <button type="button" onClick={send} className={btnBlack}>
-                이 내용으로 동의 요청 보내기
+                초안 만들고 초대 링크 받기
               </button>
             </div>
           </div>
@@ -240,7 +242,7 @@ function ReviewView({ role, now }: { role: "worker" | "client" | "operator"; now
             <p className="text-lg font-extrabold">{formatWon(terms.amount)}</p>
           </div>
           <button type="button" onClick={send} className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg bg-ink px-4 text-[15px] font-bold text-on-ink">
-            동의 요청 보내기
+            초대 링크 받기
           </button>
         </div>
       </div>

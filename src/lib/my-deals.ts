@@ -1,6 +1,6 @@
 // "나의 거래" 화면의 목록 고르기·이슈 모으기. 화면은 이 결과를 그대로 보여 준다.
 // 금액·상태는 거래 데이터(상태 기계가 만든 값)를 읽기만 하고 새로 계산하지 않는다.
-import { STATUS_LABEL, TERMINAL } from "./deal-machine";
+import { STATUS_LABEL, TERMINAL, availableActions, type ActionType } from "./deal-machine";
 import { daysUntil } from "./format";
 import { ME_CLIENT, ME_WORKER } from "./personas";
 import type { Deal, DealStatus, Party, Role } from "./types";
@@ -174,4 +174,125 @@ export function collectIssues(deals: Deal[], now: Date): Issue[] {
   }
   const order: IssueKind[] = ["dispute", "revision", "overdue", "deadline", "cancelled"];
   return out.sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind));
+}
+
+/* ───────────── 홈 현황판 ───────────── */
+// 홈은 "내 계약이 지금 어디까지 왔나"만 보여 준다. 차례 판단은 deal-machine의 availableActions를 그대로 읽고,
+// 금액·상태는 새로 계산하지 않는다. 목록 검색·필터·이슈는 나의 거래 화면이 맡는다.
+
+/** 홈에서 "할 일"로 보는 동작과 그 문구. 조건 수정·철회, 분쟁 접수·취소 같은 선택 동작은 할 일로 세지 않는다. */
+const TODO_TEXT: Partial<Record<ActionType, (d: Deal) => string>> = {
+  agree: () => "조건 확인하고 동의하기",
+  report_deposit: (d) => (d.terms.paymentRoute === "direct" ? "작업자에게 송금하고 알리기" : "운영자 계좌로 입금하고 알리기"),
+  confirm_received: () => "대금을 받았는지 확인하기",
+  submit_delivery: (d) => (d.revisionsUsed > 0 ? `수정 ${d.revisionsUsed}회차 반영본 납품하기` : "작업 결과물 납품하기"),
+  approve: () => "납품물 검수하기",
+  confirm_settlement: () => "정산 완료 확인하기",
+  confirm_deposit: () => "입금 확인하기",
+  confirm_payout: () => "작업자에게 지급하고 완료 처리하기",
+  resolve_dispute: () => "분쟁 처리하기",
+};
+
+/** 이 거래에서 "나"의 자리. 운영자는 operator, 당사자는 시연 인물이 앉은 쪽 */
+export function sideIn(deal: Deal, role: Role): Role {
+  if (role === "operator") return "operator";
+  const p = personaFor(role);
+  return p && deal.client.id === p.id ? "client" : "worker";
+}
+
+/** 내가 지금 눌러야 할 일(없으면 null) */
+export function todoFor(deal: Deal, role: Role): string | null {
+  for (const a of availableActions(deal, sideIn(deal, role))) {
+    const text = TODO_TEXT[a];
+    if (text) return text(deal);
+  }
+  return null;
+}
+
+/** 내 차례가 아닐 때 누구를 기다리는지 */
+export function waitingText(deal: Deal): string {
+  const direct = deal.terms.paymentRoute === "direct";
+  switch (deal.status) {
+    case "proposed":
+      return "상대의 조건 동의 대기";
+    case "awaiting_deposit":
+      return direct ? "의뢰인 송금 대기" : "의뢰인 입금 대기";
+    case "deposit_reported":
+      return direct ? "작업자 수령 확인 대기" : "운영자 입금 확인 대기";
+    case "in_progress":
+      return "작업자 작업 중";
+    case "in_review":
+      return "의뢰인 검수 대기";
+    case "awaiting_payout":
+      return direct ? "작업자 정산 확인 대기" : "운영자 지급 대기";
+    case "disputed":
+      return "운영자 분쟁 처리 중";
+    default:
+      return STATUS_LABEL[deal.status];
+  }
+}
+
+/** 대금이 어디까지 갔는지 한 줄(상태 이름을 대금 쪽 말로 바꿔 읽는다. 금액 계산은 하지 않는다) */
+export function paymentStage(deal: Pick<Deal, "status" | "terms">): string {
+  const direct = deal.terms.paymentRoute === "direct";
+  switch (deal.status) {
+    case "proposed":
+      return "동의 전";
+    case "awaiting_deposit":
+      return "입금 전";
+    case "deposit_reported":
+      return direct ? "작업자 수령 확인 중" : "운영자 입금 확인 중";
+    case "in_progress":
+    case "in_review":
+      return direct ? "작업자 수령 확인됨" : "운영자 입금 확인됨";
+    case "awaiting_payout":
+      return direct ? "정산 확인 대기" : "작업자 지급 대기";
+    case "settled":
+      return "정산 완료";
+    case "disputed":
+      return "분쟁 처리 중";
+    case "cancelled":
+      return "거래 취소";
+  }
+}
+
+export interface BoardItem {
+  deal: Deal;
+  /** 할 일 또는 기다리는 일 한 줄 */
+  note: string;
+}
+
+export interface Board {
+  /** 내가 할 일이 있는 거래(마감 빠른 순) */
+  todo: BoardItem[];
+  /** 진행 중이지만 상대·운영자 차례인 거래(마감 빠른 순) */
+  waiting: BoardItem[];
+  /** 정산 완료·취소(최근 순) */
+  done: Deal[];
+  /** 이 사람이 낀 거래 수(0이면 홈에 사용법을 보여 준다) */
+  total: number;
+}
+
+export function homeBoard(deals: Deal[], role: Role): Board {
+  const mine = involvedDeals(deals, role);
+  const todo: BoardItem[] = [];
+  const waiting: BoardItem[] = [];
+  const done: Deal[] = [];
+  for (const d of mine) {
+    if (TERMINAL.includes(d.status)) {
+      done.push(d);
+      continue;
+    }
+    const t = todoFor(d, role);
+    if (t) todo.push({ deal: d, note: t });
+    else waiting.push({ deal: d, note: waitingText(d) });
+  }
+  const byDeadline = (a: BoardItem, b: BoardItem) => a.deal.terms.deadline.localeCompare(b.deal.terms.deadline);
+  const lastAt = (d: Deal) => d.history.at(-1)?.at ?? d.createdAt;
+  return {
+    todo: todo.sort(byDeadline),
+    waiting: waiting.sort(byDeadline),
+    done: done.sort((a, b) => lastAt(b).localeCompare(lastAt(a))),
+    total: mine.length,
+  };
 }

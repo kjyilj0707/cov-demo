@@ -4,10 +4,39 @@
 import { MAX_REVISION_LIMIT, validateTerms } from "./deal-machine";
 import { daysUntil, formatDate, formatWon, workTypeText } from "./format";
 import { CREATORS, canContractWith, findCreator } from "./creators";
-import { CLIENT_CHOICES } from "./personas";
+import { CLIENT_CHOICES, ME_CLIENT, ME_WORKER } from "./personas";
 import { FILE_FORMATS, PAYMENT_ROUTE_LABEL, type Party, type Terms } from "./types";
 
-/* ───────────── 계약 상대 ───────────── */
+/* ───────────── 계약 상대: 초대 링크 ───────────── */
+
+/**
+ * 상대는 서비스 안에서 찾지 않는다. 이미 DM·지인으로 정한 상대에게 초대 링크를 보내고,
+ * 만드는 사람은 "상대를 부를 이름"만 자유롭게 적는다(계약서와 거래 화면에 이 이름이 보인다).
+ */
+export const COUNTER_NAME_MAX = 30;
+
+/** 1단계 상대 이름 검사. 화면 편의용이며 실제 서비스에서는 서버도 같은 검사를 해야 한다. */
+export function counterNameError(name: string): string | null {
+  const n = name.trim();
+  if (!n) return "상대를 부를 이름을 적어 주세요.";
+  if (n.length > COUNTER_NAME_MAX) return `상대를 부를 이름은 ${COUNTER_NAME_MAX}자 이내로 적어 주세요.`;
+  return null;
+}
+
+/**
+ * 초대받는 상대의 거래 당사자 값.
+ * 시연판에는 상대 역할의 사람이 한 명(헤더 역할 전환의 작업자·의뢰인)뿐이라, 링크를 받는 사람을 그 시연 인물로 둔다.
+ * 이름은 만드는 사람이 적은 이름을 그대로 쓴다. 실제 서비스에서는 상대가 링크로 들어와 로그인하면
+ * 그 계정이 거래에 붙는다(서버·DB가 정할 일).
+ */
+export function invitedParty(myRole: "worker" | "client", name: string): Party {
+  return { id: myRole === "worker" ? ME_CLIENT.id : ME_WORKER.id, name: name.trim() };
+}
+
+/* ───────────── [보관] 계약 상대 검색 ─────────────
+ * 2026-11-18 상대 지정을 초대 링크로 바꾸기 전에 쓰던 이름 검색(components/PartyPicker.tsx).
+ * 화면에서는 쓰지 않는다. 2단계 매칭 기능 때 다시 쓰려고 남겨 둔다.
+ */
 
 /** 의뢰인이 고를 수 있는 작업자: 홈 검색의 가상 창작자 중 계약을 열어 둔 분야의 창작자(공연·라이브 제외) */
 export const WORKER_CHOICES: Party[] = CREATORS.filter(canContractWith).map((c) => ({ id: c.id, name: c.name }));
@@ -197,10 +226,12 @@ export function ymdAfter(now: Date, days: number): string {
 /* ───────────── 작성 중인 값 넘기기(sessionStorage) ───────────── */
 
 export interface ContractDraft {
-  v: 1;
+  /** 2 = 상대를 이름(자유 입력)으로 적는 모양. 1(검색으로 고른 상대 id)은 읽지 않는다 */
+  v: 2;
   /** 작성한 역할. 확인하기에서 역할이 바뀌었으면 다시 쓰게 한다 */
   role: "worker" | "client";
-  counterId: string;
+  /** 상대를 부를 이름(자유 입력) */
+  counterName: string;
   terms: Terms;
   budget: BudgetRange;
 }
@@ -236,14 +267,14 @@ export function clearDraft(): void {
 export function parseDraft(x: unknown): ContractDraft | null {
   if (!x || typeof x !== "object") return null;
   const d = x as Partial<ContractDraft>;
-  if (d.v !== 1 || (d.role !== "worker" && d.role !== "client") || typeof d.counterId !== "string") return null;
+  if (d.v !== 2 || (d.role !== "worker" && d.role !== "client") || typeof d.counterName !== "string") return null;
   const t = d.terms as Terms | undefined;
   const b = d.budget as BudgetRange | undefined;
   if (!t || typeof t !== "object" || !b || typeof b.min !== "number") return null;
   return {
-    v: 1,
+    v: 2,
     role: d.role,
-    counterId: d.counterId,
+    counterName: d.counterName,
     terms: { ...t, revisionLimit: typeof t.revisionLimit === "number" ? t.revisionLimit : NaN, fileFormats: [...(t.fileFormats ?? [])] },
     budget: { min: b.min, max: typeof b.max === "number" ? b.max : null },
   };

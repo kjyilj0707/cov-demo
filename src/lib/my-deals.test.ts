@@ -4,7 +4,10 @@ import {
   collectIssues,
   countByFilter,
   filterDeals,
+  homeBoard,
   involvedDeals,
+  paymentStage,
+  todoFor,
   menuFor,
   opsDeals,
   parseFilter,
@@ -113,5 +116,41 @@ describe("collectIssues", () => {
 
   it("끝난 거래는 마감이 지나도 이슈가 아니다", () => {
     expect(collectIssues([base({ status: "settled", terms: { ...base({}).terms, deadline: "2026-01-01" } })], NOW)).toEqual([]);
+  });
+});
+
+describe("홈 현황판", () => {
+  it("한 거래는 할 일·차례 대기·완료 중 한 곳에만 들어간다", async () => {
+    const deals = await buildSeed(NOW);
+    for (const role of ["worker", "client", "operator"] as const) {
+      const b = homeBoard(deals, role);
+      const ids = [...b.todo.map((x) => x.deal.id), ...b.waiting.map((x) => x.deal.id), ...b.done.map((d) => d.id)];
+      expect(new Set(ids).size).toBe(ids.length);
+      expect(ids.length).toBe(involvedDeals(deals, role).length);
+      expect(b.total).toBe(ids.length);
+    }
+  });
+
+  it("할 일은 지금 내가 누를 수 있는 동작이 있는 거래뿐", async () => {
+    const deals = await buildSeed(NOW);
+    const b = homeBoard(deals, "client");
+    for (const x of b.todo) expect(todoFor(x.deal, "client")).toBe(x.note);
+    for (const x of b.waiting) expect(todoFor(x.deal, "client")).toBeNull();
+  });
+
+  it("운영자의 할 일은 운영 처리 대기 거래와 같다", async () => {
+    const deals = await buildSeed(NOW);
+    expect(homeBoard(deals, "operator").todo.map((x) => x.deal.id).sort()).toEqual(opsDeals(deals).map((d) => d.id).sort());
+  });
+
+  it("거래가 없으면 total 0", () => {
+    expect(homeBoard([], "worker").total).toBe(0);
+  });
+
+  it("대금 단계 문구는 대금 경로에 따라 다르다", () => {
+    const t = (paymentRoute: "operator" | "direct") => ({ paymentRoute }) as Deal["terms"];
+    expect(paymentStage({ status: "deposit_reported", terms: t("operator") })).toBe("운영자 입금 확인 중");
+    expect(paymentStage({ status: "deposit_reported", terms: t("direct") })).toBe("작업자 수령 확인 중");
+    expect(paymentStage({ status: "settled", terms: t("operator") })).toBe("정산 완료");
   });
 });

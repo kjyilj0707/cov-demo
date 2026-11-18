@@ -10,6 +10,8 @@ import {
   budgetValueAt,
   counterChoices,
   counterError,
+  counterNameError,
+  invitedParty,
   firstErrorStep,
   parseDraft,
   parseRevisionText,
@@ -138,7 +140,10 @@ describe("작성 값 넘기기", () => {
   it("저장 모양이 틀리면 버리고, NaN(JSON null)은 되돌린다", () => {
     expect(parseDraft(null)).toBeNull();
     expect(parseDraft({ v: 2 })).toBeNull();
-    const d = parseDraft(JSON.parse(JSON.stringify({ v: 1, role: "worker", counterId: "c", terms: { ...filled, revisionLimit: NaN }, budget: FULL_BUDGET })));
+    // 검색으로 고른 상대 id를 담던 예전 모양(v1)은 읽지 않는다
+    expect(parseDraft({ v: 1, role: "worker", counterId: "c", terms: filled, budget: FULL_BUDGET })).toBeNull();
+    const d = parseDraft(JSON.parse(JSON.stringify({ v: 2, role: "worker", counterName: "밴드 소다빛", terms: { ...filled, revisionLimit: NaN }, budget: FULL_BUDGET })));
+    expect(d!.counterName).toBe("밴드 소다빛");
     expect(Number.isNaN(d!.terms.revisionLimit)).toBe(true);
     expect(d!.budget.max).toBeNull();
   });
@@ -174,5 +179,25 @@ describe("계약 상대 검색(콤보박스)", () => {
   it("상대를 고르지 않으면 1단계 오류", () => {
     expect(counterError("worker", "")).toMatch(/검색해서 골라/);
     expect(counterError("worker", ME_CLIENT.id)).toBeNull();
+  });
+});
+
+describe("계약 상대: 초대 링크", () => {
+  it("상대를 부를 이름은 비우거나 너무 길면 오류", () => {
+    expect(counterNameError("   ")).toMatch(/이름을 적어/);
+    expect(counterNameError("가".repeat(31))).toMatch(/30자 이내/);
+    expect(counterNameError(" 밴드 소다빛 ")).toBeNull();
+  });
+
+  it("초대받는 상대는 시연의 상대 역할 인물이고, 이름은 적은 그대로(앞뒤 공백만 뺀다)", () => {
+    expect(invitedParty("worker", " 소다빛 밴드 ")).toEqual({ id: ME_CLIENT.id, name: "소다빛 밴드" });
+    expect(invitedParty("client", "온결")).toEqual({ id: ME_WORKER.id, name: "온결" });
+  });
+
+  it("상대 이름은 조건 해시에 들어가지 않는다(같은 조건이면 이름이 달라도 해시가 같다)", async () => {
+    const a = createDeal({ id: "a", terms: filled, worker: ME_WORKER, client: invitedParty("worker", "가"), proposer: { role: "worker", name: ME_WORKER.name } }, NOW);
+    const b = createDeal({ id: "b", terms: filled, worker: ME_WORKER, client: invitedParty("worker", "나"), proposer: { role: "worker", name: ME_WORKER.name } }, NOW);
+    if (!a.ok || !b.ok) throw new Error("create failed");
+    expect(await hashTerms(a.deal.terms)).toBe(await hashTerms(b.deal.terms));
   });
 });

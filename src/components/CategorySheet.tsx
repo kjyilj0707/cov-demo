@@ -1,5 +1,8 @@
 "use client";
 
+// [보관] 창작자 검색 홈(src/archive/creator-search)에서만 쓰던 분야 패널. 2026-11-18 홈을 계약 현황 중심으로 바꾸며
+// 화면에서 뺐고, 2단계 매칭 기능 때 다시 쓰려고 남겨 둔다. 지금은 어느 화면에도 붙어 있지 않다.
+
 import { useEffect, useRef, useState } from "react";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { CreatorCard } from "@/components/CreatorCard";
@@ -14,7 +17,7 @@ function creatorsFor(view: SheetView) {
 const rowId = (cat: string, list: string) => `cat-row-${cat}-${list}`;
 
 /**
- * 카테고리 더보기 패널(2026-11-17 팀 회의, KREAM 방식).
+ * 카테고리 더보기 패널.
  * 휴대폰: 화면 전체를 덮는다. 컴퓨터(md 768px~): 가운데 큰 패널.
  * 왼쪽은 분야 세로 탭, 오른쪽은 고른 분야의 세부 분야 목록. 브랜드 탭은 두지 않는다.
  * 세부 분야 줄을 누르면 패널 안에서 그 창작자들의 프로필 요약 목록을 보여 주고,

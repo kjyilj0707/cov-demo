@@ -1,5 +1,8 @@
 "use client";
 
+// [보관] CreatorCard는 창작자 검색 결과 카드라 지금은 어느 화면에도 붙어 있지 않다(2단계 매칭 때 다시 쓴다).
+// Monogram(첫 글자 동그라미)은 프로필 화면이 계속 쓴다.
+
 import Link from "next/link";
 import { pct, trustFor, type Creator } from "@/lib/creators";
 import { ME_WORKER } from "@/lib/personas";

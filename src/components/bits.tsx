@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { MAIN_FLOW, statusLabel } from "@/lib/deal-machine";
 import { daysUntil, formatDate, formatWon } from "@/lib/format";
+import { paymentStage } from "@/lib/my-deals";
 import { agreedAmount } from "@/lib/stats";
 import type { Deal, DealStatus, Role } from "@/lib/types";
 import { PAYMENT_ROUTE_LABEL, ROLE_LABEL } from "@/lib/types";
@@ -71,10 +72,23 @@ export function revisionText(deal: Deal): string {
 }
 
 /**
- * 나의 거래 목록 카드(나의 거래 화면에서만 쓴다).
+ * 거래 카드(홈 현황판과 나의 거래 목록이 함께 쓴다).
  * side: 이 거래에서 "나"의 자리. 판매·구매 활동처럼 역할과 다른 자리의 거래를 보여 줄 때 넘긴다.
+ * note: 홈 현황판의 한 줄(mine = 내가 할 일, 아니면 기다리는 일).
  */
-export function DealCard({ deal, role: viewRole, now, side }: { deal: Deal; role: Role; now: Date; side?: "worker" | "client" }) {
+export function DealCard({
+  deal,
+  role: viewRole,
+  now,
+  side,
+  note,
+}: {
+  deal: Deal;
+  role: Role;
+  now: Date;
+  side?: "worker" | "client";
+  note?: { text: string; mine: boolean };
+}) {
   const role: Role = viewRole === "operator" ? "operator" : (side ?? viewRole);
   const other =
     role === "worker"
@@ -91,6 +105,16 @@ export function DealCard({ deal, role: viewRole, now, side }: { deal: Deal; role
         href={`/deal/?id=${encodeURIComponent(deal.id)}`}
         className="block h-full rounded-lg border border-line bg-card p-4 transition-colors hover:border-ink"
       >
+        {note && (
+          <p
+            className={`mb-2 inline-flex max-w-full items-center gap-1.5 rounded-md px-2 py-1 text-[13px] font-bold ${
+              note.mine ? "bg-accent text-on-accent" : "bg-muted text-ink-2"
+            }`}
+          >
+            <span className="sr-only">{note.mine ? "내가 할 일: " : "기다리는 일: "}</span>
+            <span className="truncate">{note.text}</span>
+          </p>
+        )}
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h3 className="font-bold leading-snug">{deal.terms.title}</h3>
@@ -125,7 +149,10 @@ export function DealCard({ deal, role: viewRole, now, side }: { deal: Deal; role
         </dl>
         <div className="mt-3 flex items-center gap-2">
           <ProgressBar deal={deal} />
-          <span className="shrink-0 text-[11px] text-ink-2">{PAYMENT_ROUTE_LABEL[deal.terms.paymentRoute]}</span>
+          <span className="shrink-0 text-[11px] text-ink-2">
+            <span className="sr-only">대금: </span>
+            {PAYMENT_ROUTE_LABEL[deal.terms.paymentRoute]} · {paymentStage(deal)}
+          </span>
         </div>
       </Link>
     </li>

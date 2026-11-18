@@ -1,5 +1,8 @@
 "use client";
 
+// [보관] 계약 상대 이름 검색(콤보박스). 2026-11-18 상대 지정을 "초대 링크"로 바꾸며 계약 만들기에서 뺐다.
+// 2단계 매칭(서비스 안에서 상대 찾기) 때 다시 쓸 수 있어 남겨 둔다. 지금은 어느 화면에도 붙어 있지 않다.
+
 import { useId, useRef, useState } from "react";
 import { searchCounterparts, type CounterHit } from "@/lib/contract-form";
 import type { Party } from "@/lib/types";

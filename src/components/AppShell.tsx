@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { AUTO_APPROVE_DAYS } from "@/lib/deal-machine";
 import { formatDateTime } from "@/lib/format";
@@ -40,18 +40,6 @@ function TabIcon({ name }: { name: IconName }) {
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const demo = useDemo();
   const pathname = usePathname();
-  const router = useRouter();
-
-  /** 헤더 검색 버튼: 홈이면 검색창에 바로 포커스, 다른 화면이면 홈으로 가서 포커스(?focus=search). */
-  function goSearch() {
-    if (pathname === "/") {
-      const q = document.getElementById("q");
-      q?.focus();
-      q?.scrollIntoView({ block: "center" });
-    } else {
-      router.push("/?focus=search");
-    }
-  }
   const [toolsOpen, setToolsOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [notice, setNotice] = useState("");
@@ -67,6 +55,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           { href: "/profile/", label: "프로필", icon: "user" },
         ]
       : [
+          // 계약 중심 메뉴(2026-11-18): 창작자 검색·분야 찾기는 2단계 매칭 기능이라 메뉴에 두지 않는다.
           { href: "/", label: "홈", icon: "home" },
           // 계약 상세(/deal/)는 거래 목록에서 들어가는 하위 화면이라 "나의 거래"를 켠다.
           { href: "/deals/", label: "나의 거래", icon: "list", also: ["/deal/"] },
@@ -155,16 +144,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   })}
                 </ul>
               </nav>
-              <button
-                type="button"
-                aria-label="창작자 검색"
-                onClick={goSearch}
-                className="inline-flex size-11 items-center justify-center rounded-full text-ink hover:bg-muted"
-              >
-                <svg aria-hidden="true" viewBox="0 0 24 24" className="size-7" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
-                  <path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4" />
-                </svg>
-              </button>
             </div>
           </div>
         </div>

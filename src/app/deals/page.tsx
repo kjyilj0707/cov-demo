@@ -245,7 +245,7 @@ function sectionIntro(view: ActivityView, name?: string): string {
 
 function emptyText(view: ActivityView, name?: string): string {
   if (view === "sell") return `${name}의 판매 거래가 아직 없습니다.`;
-  if (view === "buy") return `${name}의 구매 거래가 아직 없습니다. 홈에서 창작자를 찾아 계약을 만들어 보세요.`;
+  if (view === "buy") return `${name}의 구매 거래가 아직 없습니다. 새 계약을 만들고 초대 링크로 상대를 불러 보세요.`;
   if (view === "ops") return "지금 운영자가 처리할 거래가 없습니다.";
   return "거래가 없습니다.";
 }

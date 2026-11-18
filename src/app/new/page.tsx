@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
-import { btnPrimary, btnSecondary, inputCls } from "@/components/bits";
+import { btnPrimary, inputCls } from "@/components/bits";
 import { BudgetRangeField } from "@/components/BudgetRangeField";
-import { PartyPicker } from "@/components/PartyPicker";
 import { RevisionDial } from "@/components/RevisionDial";
 import { WheelPicker } from "@/components/WheelPicker";
 import { emptyTerms } from "@/components/TermsForm";
@@ -15,10 +14,9 @@ import {
   LAST_FORM_STEP,
   amountRangeError,
   budgetText,
-  counterChoices,
-  counterError,
+  COUNTER_NAME_MAX,
+  counterNameError,
   firstErrorStep,
-  isPausedCreator,
   loadDraft,
   parseRevisionText,
   parseWon,
@@ -27,7 +25,6 @@ import {
   ymdAfter,
   type BudgetRange,
 } from "@/lib/contract-form";
-import { findCreator } from "@/lib/creators";
 import { AUTO_APPROVE_DAYS, WORK_TYPE_DETAIL_MAX } from "@/lib/deal-machine";
 import { formatDate } from "@/lib/format";
 import { demoNow, useDemo } from "@/lib/store";
@@ -44,8 +41,6 @@ export default function NewDealPage() {
 function NewDealView() {
   const demo = useDemo();
   const params = useSearchParams();
-  // 창작자 프로필의 "이 창작자와 계약 만들기"에서 오면 ?worker=<id>로 상대가 미리 골라져 있다.
-  const presetWorker = params.get("worker");
   // 확인하기의 "수정"에서 오면 ?step=<단계>로 그 단계를 연다.
   const stepParam = Number(params.get("step"));
   if (!demo) return null;
@@ -62,35 +57,10 @@ function NewDealView() {
     );
   }
 
-  const isWorker = demo.role === "worker";
-  // 주소를 직접 고쳐 ?worker=공연·라이브 창작자로 들어와도 계약 양식을 열지 않는다.
-  // (화면에서 막는 것일 뿐이다. 실제 서비스에서는 서버도 같은 검사를 해야 한다.)
-  if (!isWorker && isPausedCreator(presetWorker)) {
-    const c = findCreator(presetWorker!)!;
-    return (
-      <div className="space-y-4 py-8 text-center">
-        <h1 className="text-xl font-bold">공연 계약은 준비 중입니다</h1>
-        <p className="text-ink-2">
-          {c.name}은(는) 공연·라이브 분야 창작자입니다. 공연은 파일 납품이 없어 지금의 계약 절차와 맞지 않아, 계약 방식이 정해질
-          때까지 계약을 만들 수 없습니다.
-        </p>
-        <div className="flex flex-wrap justify-center gap-2">
-          <Link href={`/profile/?id=${encodeURIComponent(c.id)}`} className={btnPrimary}>
-            프로필로 돌아가기
-          </Link>
-          <Link href="/new/" className={btnSecondary}>
-            다른 창작자와 계약 만들기
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <ContractSteps
       key={demo.role}
       role={demo.role}
-      presetWorker={isWorker ? null : presetWorker}
       startStep={Number.isInteger(stepParam) && stepParam >= 1 && stepParam <= LAST_FORM_STEP ? stepParam : 1}
       now={demoNow(demo)}
     />
@@ -106,10 +76,11 @@ const choice = (on: boolean) =>
 /** 단계별 안내 상자(한 줄)와 도움말. 시연판의 실제 규칙만 적는다. */
 const GUIDE: Record<number, { info: string; help: string[] }> = {
   1: {
-    info: "계약 상대와 작업 이름, 작업 유형을 정합니다.",
+    info: "이미 이야기 나눈 상대를 부를 이름과 작업 이름, 작업 유형을 정합니다. 상대는 초안을 만든 뒤 초대 링크로 부릅니다.",
     help: [
-      "시연판에서는 가상 상대 중에서 고릅니다. 실제 서비스에서는 초대 링크로 상대를 부릅니다.",
-      "공연·라이브 분야 창작자는 계약 방식이 정해질 때까지 고를 수 없습니다.",
+      "상대를 이 서비스에서 찾지 않습니다. 계약 초안을 만들면 초대 링크가 나오고, 그 링크를 카톡·DM으로 보내면 됩니다.",
+      "상대를 부를 이름은 계약서와 거래 화면에 그대로 보입니다. 상대가 동의하기 전에는 고칠 수 있습니다.",
+      "시연판에서는 링크를 다른 기기로 보내도 열리지 않습니다(거래가 이 브라우저에만 저장됨). 거래 화면의 '상대로 보기'로 흉내 냅니다.",
     ],
   },
   2: {
@@ -135,30 +106,25 @@ const GUIDE: Record<number, { info: string; help: string[] }> = {
 
 function ContractSteps({
   role,
-  presetWorker,
   startStep,
   now,
 }: {
   role: "worker" | "client";
-  presetWorker: string | null;
   startStep: number;
   now: Date;
 }) {
   const router = useRouter();
-  const choices = counterChoices(role);
   // 작성 중인 값: 같은 탭 안에서는 sessionStorage에 남겨, 확인하기에서 "수정"으로 돌아와도 그대로 둔다.
-  // 프로필에서 새로 들어오면(?worker=) 그 창작자로 새로 시작한다.
   const [init] = useState(() => {
     const d = loadDraft();
-    if (d && d.role === role && (!presetWorker || presetWorker === d.counterId)) return { draft: d, resumed: true };
-    const preset = presetWorker ? findCreator(presetWorker) : undefined;
-    const terms: Terms = preset ? { ...emptyTerms(), workType: preset.workType } : emptyTerms();
+    if (d && d.role === role) return { draft: d, resumed: true };
+    const terms: Terms = emptyTerms();
     return {
-      draft: { v: 1 as const, role, counterId: presetWorker ?? "", terms, budget: FULL_BUDGET },
+      draft: { v: 2 as const, role, counterName: "", terms, budget: FULL_BUDGET },
       resumed: false,
     };
   });
-  const [counterId, setCounterId] = useState(init.draft.counterId);
+  const [counterName, setCounterName] = useState(init.draft.counterName);
   const [t, setT] = useState<Terms>(init.draft.terms);
   const [budget, setBudget] = useState<BudgetRange>(init.draft.budget);
   const [amountText, setAmountText] = useState(t.amount ? new Intl.NumberFormat("ko-KR").format(t.amount) : "");
@@ -171,19 +137,17 @@ function ContractSteps({
   const errRef = useRef<HTMLDivElement>(null);
   const firstRender = useRef(true);
 
-  const selected = choices.find((c) => c.id === counterId) ?? null;
-  const selectedCreator = selected ? findCreator(selected.id) : undefined;
-  /** 이 단계의 오류(1단계는 상대 검사를 더한다) */
+  /** 이 단계의 오류(1단계는 상대 이름 검사를 더한다) */
   const errorsFor = (n: number) => {
-    const ce = n === 1 ? counterError(role, counterId) : null;
+    const ce = n === 1 ? counterNameError(counterName) : null;
     return [...(ce ? [ce] : []), ...stepErrors(n, t, budget)];
   };
   const up = <K extends keyof Terms>(k: K, v: Terms[K]) => setT((p) => ({ ...p, [k]: v }));
 
   // 입력이 바뀔 때마다 같은 탭의 sessionStorage에 남긴다(확인하기 페이지로 넘기는 통로)
   useEffect(() => {
-    saveDraft({ v: 1, role, counterId, terms: t, budget });
-  }, [role, counterId, t, budget]);
+    saveDraft({ v: 2, role, counterName, terms: t, budget });
+  }, [role, counterName, t, budget]);
 
   // 단계가 바뀌면 카드 제목으로 포커스(처음 열 때는 건드리지 않는다)
   useEffect(() => {
@@ -211,13 +175,13 @@ function ContractSteps({
     }
     if (step < LAST_FORM_STEP) return go(step + 1);
     // 마지막 입력 단계: 전체를 다시 보고 확인하기 페이지로
-    const bad = counterError(role, counterId) ? 1 : firstErrorStep(t, budget);
+    const bad = counterNameError(counterName) ? 1 : firstErrorStep(t, budget);
     if (bad !== null) {
       go(bad);
       setErrors(errorsFor(bad));
       return;
     }
-    saveDraft({ v: 1, role, counterId, terms: t, budget });
+    saveDraft({ v: 2, role, counterName, terms: t, budget });
     router.push("/new/review/");
   }
 
@@ -235,7 +199,7 @@ function ContractSteps({
     <div className="bg-muted pb-28 [box-shadow:0_0_0_100vmax_var(--muted)] [clip-path:inset(-2rem_-100vmax_-100vmax)] md:pb-24">
       <div className="pt-2 md:grid md:grid-cols-[200px_minmax(0,1fr)] md:items-start md:gap-8 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-12 lg:pt-4">
         <div className="md:sticky md:top-36">
-          <Link href="/deals/" className="inline-flex min-h-9 items-center text-sm font-semibold text-ink-2 hover:text-ink">
+          <Link href="/" className="inline-flex min-h-9 items-center text-sm font-semibold text-ink-2 hover:text-ink">
             ‹ 나가기
           </Link>
           <h1 className="mt-1 text-[26px] font-extrabold leading-tight tracking-tight lg:mt-3 lg:text-[34px]">새 계약 만들기</h1>
@@ -360,27 +324,19 @@ function ContractSteps({
               <>
                 <Item
                   id="counter"
-                  label={role === "worker" ? "의뢰인" : "작업자"}
+                  label={role === "worker" ? "의뢰인을 부를 이름" : "작업자를 부를 이름"}
                   required
-                  hint={
-                    role === "worker"
-                      ? "이 서비스에 있는 의뢰인 중에서 찾습니다. 시연판에서는 가상 의뢰인만 있습니다."
-                      : "이 서비스에 있는 작업자 중에서 찾습니다. 공연·라이브 창작자는 아직 계약할 수 없습니다."
-                  }
+                  hint={`검색이 아니라, 계약서에 적힐 상대 이름을 직접 적습니다(${COUNTER_NAME_MAX}자 이내). 초안을 만들면 이 상대에게 보낼 초대 링크가 나옵니다.`}
                 >
-                  <PartyPicker
+                  <input
                     id="counter"
-                    role={role}
-                    label={role === "worker" ? "의뢰인" : "작업자"}
-                    selected={selected}
-                    selectedSub={role === "worker" ? "의뢰인" : selectedCreator?.field}
-                    describedBy="counter-hint"
-                    onSelect={(p) => {
-                      setCounterId(p?.id ?? "");
-                      // 창작자를 고르면 그 창작자의 대표 작업 유형을 미리 맞춘다(다이얼에서 바꿀 수 있다)
-                      const c = p ? findCreator(p.id) : undefined;
-                      if (role === "client" && c) up("workType", c.workType);
-                    }}
+                    className={inputCls}
+                    value={counterName}
+                    onChange={(e) => setCounterName(e.target.value)}
+                    placeholder={role === "worker" ? "예: 밴드 소다빛" : "예: 온결 스튜디오"}
+                    maxLength={COUNTER_NAME_MAX}
+                    autoComplete="off"
+                    aria-describedby="counter-hint"
                   />
                 </Item>
                 <Item id="title" label="프로젝트 제목" required>

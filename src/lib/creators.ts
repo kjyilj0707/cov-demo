@@ -1,4 +1,6 @@
-// 홈 검색에 쓰는 가상 창작자 목록. DB가 없어서 정적 데이터로 둔다.
+// 가상 창작자 목록. DB가 없어서 정적 데이터로 둔다.
+// [보관] 검색·분야 함수(searchCreators, CATEGORIES 등)는 2026-11-18 홈에서 창작자 검색을 빼면서 쓰지 않는다.
+// 2단계 매칭 기능 때 다시 쓰려고 남겨 둔다. 프로필 화면은 findProfileTarget·trustFor를 계속 쓴다.
 // 모든 이름·소개는 시연용으로 지어낸 것이며 실존 인물·업체와 관계없다.
 import { ME_CLIENT, ME_WORKER, OTHER_CLIENT } from "./personas";
 import { trustProfile } from "./stats";
@@ -25,7 +27,7 @@ export interface Category {
   subcategories: Subcategory[];
 }
 
-// 공연·라이브(live)는 2026-11-17 팀 회의에서 새로 만든 분야이며 분류는 아직 확정 전이다.
+// 공연·라이브(live)는 새로 만든 분야이며 분류는 아직 확정 전이다.
 // 공연은 파일 납품이 없어 계약 흐름(WORK_TYPES)과 맞지 않으므로 검색·분야 화면에서만 쓴다.
 export const CATEGORIES: Category[] = [
   {
