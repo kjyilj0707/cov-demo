@@ -8,6 +8,7 @@ import { formatDateTime } from "@/lib/format";
 import { ROLE_PERSONA } from "@/lib/personas";
 import { demoNow, fastForward, resetDemo, setRole, useDemo } from "@/lib/store";
 import type { Role } from "@/lib/types";
+import { CovLogoCombination, CovLogoWordmark } from "./CovLogo";
 
 const ROLES: Role[] = ["worker", "client", "operator"];
 
@@ -112,15 +113,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </div>
           <div className={`${WRAP} flex h-20 items-center justify-between gap-4 lg:gap-8`}>
             <Link href="/" aria-label="CoV 시연판 홈" className="flex shrink-0 items-center gap-3">
-              <span aria-hidden="true" className="text-[32px] lg:text-[40px] font-black leading-none tracking-tight text-ink">
-                C<span className="text-accent">o</span>V
-              </span>
-              <span aria-hidden="true" className="h-8 w-px bg-ink lg:h-10" />
-              <span className="text-[12px] font-bold leading-tight text-ink lg:text-[13px]">
-                Connection
-                <br />
-                of Values
-              </span>
+              <CovLogoCombination className="h-14 w-auto text-accent" />
               <span className="rounded-full bg-muted px-2.5 py-0.5 text-[12px] font-semibold text-ink-2">시연판</span>
             </Link>
             <div className="flex items-center gap-4 lg:gap-8 xl:gap-10">
@@ -151,10 +144,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         {/* 휴대폰·태블릿(~1023px): 기존 두 줄 헤더 */}
         <div className={`${WRAP} flex flex-wrap items-center gap-x-3 gap-y-2 pb-3 pt-3 md:hidden`}>
           <Link href="/" aria-label="CoV 시연판 홈" className="order-1 flex shrink-0 items-center gap-2">
-            <span aria-hidden="true" className="text-[22px] font-black leading-none tracking-tight text-ink">
-              C<span className="text-accent">o</span>V
-            </span>
-            <span className="hidden text-[11px] font-semibold leading-none text-ink-2 min-[400px]:inline">Connection of Values</span>
+            <CovLogoWordmark className="h-12 w-auto text-accent" />
             <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-ink-2">시연판</span>
           </Link>
           <RoleSwitch role={role} disabled={!demo} name="role" />
