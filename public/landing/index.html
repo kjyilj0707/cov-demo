@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 body{margin:0}
-/* 레이아웃: 흰 GNB → 검정+파랑 빛 히어로(가운데 정렬 큰 제목) → 밝은 회색 숫자 띠 → 검정 기능 띠 → 흰 아코디언(흐름) → … 화면 아래 가운데 떠 있는 체험 알약 버튼. */
+/* 레이아웃: 흰 GNB → 검정+파랑 빛 히어로(가운데 정렬 큰 제목) → 밝은 회색 숫자 띠 → 검정 기능 띠 → 흰 아코디언(흐름) → …. */
 :root{
   --paper:#FFFFFF; --mist:#F2F2F0; --card:#F8F8F7; --ink:#1C1C1E; --muted:#6B6E78; --faint:#C9CBD1; --line:#E6E6E3;
   --accent:#2B4FD8; --accent-hi:#5B7BFF; --accent-soft:#E6ECFF; --pill-a:#D6E0FF; --pill-b:#EEF2FF;
@@ -420,7 +420,7 @@ footer .logo{color:#F3F4F8}
       <a class="logo" href="#top"><svg viewBox="9.9 -1.1 400 400" aria-hidden="true"><g fill="currentColor"><path d="M265.22 85.17A120.00 120.00 0 1 0 308.71 272.09L289.38 233.96A82.00 83.90 0 1 1 246.67 116.83Z"/><path d="M237.05 251.73L333.27 87.47L290.99 87.47L220.73 207.40L199.95 166.38L159.06 166.38L203.37 253.86A58.60 60.50 0 0 0 237.05 251.73Z"/></g></svg>CoV</a>
       <p style="margin-top:14px;max-width:36ch">Connection of Values. 음악·디자인·영상 외주의 계약부터 정산까지.</p>
     </div>
-    <div><h4>서비스</h4><ul><li><a href="#flow">이용 방법</a></li><li><a href="#fields">창작 분야</a></li><li><a href="https://demo.thecov.kr" target="_blank" rel="noopener">체험하기</a></li></ul></div>
+    <div><h4>서비스</h4><ul><li><a href="#flow">이용 방법</a></li><li><a href="#fields">창작 분야</a></li></ul></div>
     <div><h4>고객지원</h4><ul><li>문의 <span class="mono">info@thecov.kr</span></li><li><a href="https://thecov.kr/terms" target="_blank" rel="noopener">이용약관</a></li><li><a href="https://thecov.kr/privacy" target="_blank" rel="noopener"><b>개인정보처리방침</b></a></li></ul></div>
     <div class="legal">© 2026 CoV. 사업자 정보는 등록 후 표시됩니다. CoV는 거래 대금을 보관하지 않습니다.</div>
   </div>
@@ -500,7 +500,7 @@ footer .logo{color:#F3F4F8}
   steps.forEach((s,i)=>{
     const it=document.createElement('div'); it.className='acc-item';
     it.innerHTML=`<h3><button class="acc-btn" type="button" id="ab${i}" aria-expanded="false" aria-controls="ap${i}"><span class="n">0${i+1}</span>${s.t}</button></h3>
-      <div class="acc-body" id="ap${i}" role="region" aria-labelledby="ab${i}" hidden><div class="mock">${s.m}</div><p>${s.d}</p><a class="go" href="https://demo.thecov.kr" target="_blank" rel="noopener">체험해 보기 →</a></div>`;
+      <div class="acc-body" id="ap${i}" role="region" aria-labelledby="ab${i}" hidden><div class="mock">${s.m}</div><p>${s.d}</p></div>`;
     acc.appendChild(it);
   });
   const items=[...acc.children];
