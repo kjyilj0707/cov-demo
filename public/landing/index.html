@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>CoV 랜딩 시안</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+body{margin:0}
+/* 레이아웃: 흰 GNB → 검정+파랑 빛 히어로(가운데 정렬 큰 제목) → 밝은 회색 숫자 띠 → 검정 기능 띠 → 흰 아코디언(흐름) → … 화면 아래 가운데 떠 있는 체험 알약 버튼. */
+:root{
+  --paper:#FFFFFF; --mist:#F2F2F0; --card:#F8F8F7; --ink:#1C1C1E; --muted:#6B6E78; --faint:#C9CBD1; --line:#E6E6E3;
+  --accent:#2B4FD8; --accent-hi:#5B7BFF; --accent-soft:#E6ECFF; --pill-a:#D6E0FF; --pill-b:#EEF2FF;
+  --night:#06070B; --night-2:#0E1018; --night-card:#12141C; --night-line:#252836; --night-ink:#F3F4F8; --night-muted:#9EA3B3;
+  --ok:#1F8A5B; --ok-soft:#E4F4EC; --warn:#A86400; --warn-soft:#FFF1D6;
+  --f-sans:"Pretendard","Noto Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --max:1200px;
+}
+/* 흰 칸·검정 칸을 번갈아 고정으로 보여 주므로, 보는 사람의 다크 모드와 상관없이 같은 모습을 쓴다 */
+:root{color-scheme:light}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{background:var(--paper);color:var(--ink);font:400 16px/1.65 var(--f-sans);-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:anywhere}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--paper)}
+a{color:inherit}
+h1,h2,h3{margin:0;text-wrap:balance;letter-spacing:-.03em}
+p{margin:0}
+:focus-visible{outline:2px solid var(--accent-hi);outline-offset:3px;border-radius:8px}
+.wrap{max-width:var(--max);margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.mono{font-family:var(--f-mono)}
+.tag-ex{display:inline-block;vertical-align:middle;font:500 11px/1 var(--f-mono);padding:5px 8px;border-radius:999px;background:var(--warn-soft);color:var(--warn);letter-spacing:.04em}
+
+/* 버튼 */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:56px;padding:0 30px;border-radius:12px;font:700 17px/1 var(--f-sans);text-decoration:none;border:1px solid transparent;cursor:pointer;transition:transform .15s,filter .15s}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.05)}
+.btn.white{background:#FFFFFF;color:#111318;border-color:#D9DAE0}
+.btn.blue{background:var(--accent-hi);color:#FFFFFF}
+.btn.ink{background:var(--ink);color:var(--paper)}
+
+/* GNB */
+.gnb{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:var(--paper);border-bottom:1px solid var(--line)}
+.gnb .wrap{display:flex;align-items:center;height:76px;gap:24px}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none;font:800 24px/1 var(--f-sans);letter-spacing:-.02em;color:var(--ink)}
+.logo svg{width:30px;height:30px;color:var(--accent)}
+.gnb-right{margin-left:auto;display:flex;align-items:center;gap:22px}
+.gnb-right .login{font-size:16px;text-decoration:none}
+.burger{width:44px;height:44px;border:0;background:none;color:var(--ink);cursor:pointer;display:grid;place-items:center;padding:0}
+.burger svg{width:30px;height:30px}
+.drawer{border-top:1px solid var(--line);background:var(--paper)}
+.drawer ul{list-style:none;margin:0;padding:12px 0 20px;display:grid;gap:2px}
+.drawer a{display:block;padding:12px 0;font-size:18px;font-weight:700;text-decoration:none}
+.drawer a:hover{color:var(--accent)}
+
+/* 히어로 (어두운 화면은 두 테마 모두 고정) */
+.hero{position:relative;overflow:hidden;background:
+  radial-gradient(70% 60% at 100% 100%,color-mix(in srgb,var(--accent) 26%,transparent),transparent 65%),
+  radial-gradient(55% 50% at 0% 100%,color-mix(in srgb,var(--accent-hi) 16%,transparent),transparent 70%),
+  linear-gradient(180deg,var(--paper) 0%,var(--paper) 40%,var(--accent-soft) 100%);
+  color:var(--ink);text-align:center;padding-block:120px 150px}
+.hero::after{content:"";position:absolute;inset:0;background-image:radial-gradient(color-mix(in srgb,var(--accent) 22%,transparent) 1px,transparent 1px);background-size:7px 7px;mask-image:linear-gradient(180deg,transparent 45%,#000);pointer-events:none}
+.hero .wrap{position:relative;z-index:1}
+.hero .kicker{display:flex;justify-content:center;align-items:center;gap:22px;flex-wrap:wrap;font-size:clamp(22px,3vw,36px);font-weight:500;letter-spacing:-.02em}
+.hero .kicker .dash{width:44px;height:3px;background:var(--accent-hi);border-radius:2px}
+.roll{display:inline-block;min-width:4.4em;text-align:left;color:var(--accent);font-weight:700}
+.roll span{display:inline-block;animation:rollIn .45s ease both}
+@keyframes rollIn{from{transform:translateY(.45em);opacity:0}to{transform:none;opacity:1}}
+.hero h1{font-size:clamp(40px,7.4vw,92px);font-weight:900;line-height:1.16;margin-top:34px;letter-spacing:-.045em}
+.hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--ink) 10%,var(--accent) 90%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.h1-lead{font-size:.62em;font-weight:600;letter-spacing:-.03em}
+.cov-name{white-space:nowrap}
+.cov-name small{font-size:.28em;font-weight:500;letter-spacing:-.01em;margin-left:.04em}
+@media (max-width:560px){.cov-name{white-space:normal}}
+.hero .sub{margin:34px auto 0;font-size:clamp(17px,2vw,24px);color:var(--muted);max-width:32ch}
+.hero .btn.white{box-shadow:0 6px 18px -10px rgba(20,30,80,.35)}
+.hero .btn.blue{background:var(--accent)}
+.hero .ctas{display:flex;justify-content:center;flex-wrap:wrap;gap:14px;margin-top:52px}
+
+/* 분야 흐르는 띠 */
+.strip{background:var(--paper);border-bottom:1px solid var(--line);overflow:hidden;padding-block:30px}
+.marquee{display:flex;gap:64px;width:max-content;animation:slide 32s linear infinite}
+.marquee span{font-size:26px;font-weight:800;color:var(--faint);white-space:nowrap;letter-spacing:-.02em}
+.marquee span b{color:var(--muted);font-weight:800}
+@keyframes slide{to{transform:translateX(-50%)}}
+
+/* 숫자 띠 */
+.stats{background:var(--mist);padding-block:120px}
+.center-h{text-align:center;font-size:clamp(28px,4.2vw,52px);font-weight:800;line-height:1.32}
+.center-cta{display:flex;justify-content:center;margin-top:36px}
+.stat-list{display:grid;gap:24px;margin-top:64px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:18px;text-align:center;padding:44px 20px 52px}
+.stat .lbl{display:inline-flex;align-items:center;gap:10px;font-size:clamp(17px,2vw,22px);color:var(--muted)}
+.stat .lbl svg{width:26px;height:26px}
+.stat .num{display:block;margin-top:18px;font-size:clamp(56px,8vw,96px);font-weight:800;line-height:1;letter-spacing:-.04em}
+.stat .num small{font-size:.5em;font-weight:700;margin-left:4px}
+.stat .cap{margin-top:14px;font-size:15px;color:var(--muted)}
+
+/* 검정 기능 띠 (두 테마 고정) */
+.night{background:
+  radial-gradient(70% 60% at 0% 0%,rgba(91,123,255,.35),transparent 60%),
+  linear-gradient(180deg,#1A2A66 0%,#111B45 60%,#0E163A 100%);color:var(--night-ink);padding-block:120px}
+.night h2{font-size:clamp(34px,5vw,64px);font-weight:800;line-height:1.25}
+.night h2 em{font-style:normal;color:var(--accent-hi)}
+.night .lead{margin-top:22px;font-size:clamp(17px,1.8vw,22px);color:var(--night-muted)}
+.points{display:grid;gap:30px;margin-top:44px;max-width:900px}
+.point h3{display:flex;align-items:center;gap:14px;font-size:clamp(20px,2.4vw,30px);font-weight:700;color:#DCE3FF}
+.point h3 svg{width:32px;height:32px;color:var(--accent-hi);flex:none}
+.point p{margin-top:8px;font-size:clamp(16px,1.6vw,20px);color:var(--night-muted)}
+.dcards{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:72px}
+.dcard{background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:40px 36px 34px;display:grid;gap:18px;align-content:start}
+.dcard .ic{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:rgba(91,123,255,.12);border:1px solid rgba(91,123,255,.28);color:var(--accent-hi)}
+.dcard .ic svg{width:30px;height:30px}
+.dcard h3{font-size:clamp(21px,2.2vw,27px);font-weight:800;margin-top:10px}
+.dcard p{color:var(--night-muted);font-size:17px;line-height:1.75}
+.dcard .fine{font-size:13.5px;color:#7D8396}
+.dcard a{margin-top:14px;font-weight:700;text-decoration:none;color:var(--night-ink);font-size:17px}
+@media (max-width:900px){.dcards{grid-template-columns:1fr}}
+
+/* 흐름 아코디언 */
+.flow{padding-block:110px}
+.big-h{font-size:clamp(30px,4.4vw,52px);font-weight:800;line-height:1.3}
+.acc{margin-top:56px;border-top:1px solid var(--line)}
+.acc-item{border-bottom:1px solid var(--line)}
+.acc-btn{width:100%;display:flex;align-items:center;gap:14px;padding:36px 0;background:none;border:0;color:var(--faint);font:800 clamp(24px,3vw,36px)/1.2 var(--f-sans);letter-spacing:-.03em;text-align:left;cursor:pointer}
+.acc-btn .n{font:500 15px/1 var(--f-mono);color:inherit;width:34px}
+.acc-btn:hover{color:var(--muted)}
+.acc-item.open .acc-btn{color:var(--ink);padding-bottom:28px}
+.acc-btn .badge{font:700 13px/1 var(--f-sans);padding:7px 11px;border-radius:999px;background:var(--accent-soft);color:var(--accent);letter-spacing:0}
+.acc-body{padding-bottom:44px}
+.acc-body p{font-size:18px;color:var(--muted);margin-top:26px;max-width:72ch}
+.acc-body .go{display:inline-block;margin-top:20px;font-size:17px;text-decoration:none}
+.mock{border:1px solid var(--line);border-radius:22px;background:linear-gradient(120deg,var(--mist),var(--card));padding:36px;display:grid;grid-template-columns:.9fr 1.1fr;gap:28px;overflow:hidden}
+@media (max-width:820px){.mock{grid-template-columns:1fr;padding:20px}}
+
+/* 목업 부품 */
+.sheet{background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 40px -22px rgba(20,30,80,.35);overflow:hidden;min-width:0}
+.sheet-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.sheet-h .no{font:500 12.5px/1 var(--f-mono);color:var(--muted)}
+.sheet-b{padding:18px;display:grid;gap:14px}
+.pill{display:inline-flex;align-items:center;gap:6px;font:700 12.5px/1 var(--f-sans);padding:7px 11px;border-radius:999px;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill.blue{background:var(--accent-soft);color:var(--accent)}
+.pill.green{background:var(--ok-soft);color:var(--ok)}
+.pill.amber{background:var(--warn-soft);color:var(--warn)}
+.opts{display:grid;gap:10px}
+.opt{display:flex;align-items:center;gap:12px;padding:13px 14px;border:1px solid var(--line);border-radius:12px;font-size:15px;background:var(--paper)}
+.opt i{width:20px;height:20px;border-radius:6px;border:2px solid var(--faint);flex:none;display:grid;place-items:center}
+.opt.on i{background:var(--accent);border-color:var(--accent)}
+.opt.on i::after{content:"";width:9px;height:5px;border:2px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
+.opt span:last-child{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums}
+.row{display:flex;justify-content:space-between;gap:12px;font-size:15px;padding-bottom:12px;border-bottom:1px dashed var(--line)}
+.row:last-child{border-bottom:0;padding-bottom:0}
+.row span:first-child{color:var(--muted)}
+.row span:last-child{font-weight:700;text-align:right}
+.meter{display:inline-flex;gap:4px;vertical-align:middle}
+.meter i{width:20px;height:7px;border-radius:4px;background:var(--line)}
+.meter i.on{background:var(--accent)}
+.hash{display:flex;justify-content:space-between;align-items:center;gap:10px;font:400 12.5px/1.4 var(--f-mono);color:var(--muted);background:var(--mist);padding:11px 13px;border-radius:10px}
+.hash code{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.hash b{color:var(--ok);font-weight:500;flex:none}
+.tl{list-style:none;margin:0;padding:0;display:grid;gap:12px;font-size:15px}
+.tl li{display:grid;grid-template-columns:86px 1fr;gap:10px}
+.tl time{font:400 12.5px/1.6 var(--f-mono);color:var(--muted)}
+.btns{display:flex;gap:8px}
+.btns span{flex:1;height:44px;border-radius:10px;display:grid;place-items:center;font-weight:700;font-size:15px;border:1px solid var(--line)}
+.btns span.p{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* 분야 */
+.fields{background:var(--mist);padding-block:110px}
+.tabs{display:flex;flex-wrap:wrap;gap:10px;margin-top:44px}
+.tab{height:48px;padding:0 22px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--muted);font:700 16px/1 var(--f-sans);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.field{margin-top:22px;background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:40px;display:grid;grid-template-columns:1fr 1fr;gap:40px}
+.field h3{font-size:30px;font-weight:800}
+.field .desc{margin-top:12px;font-size:17px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.chip{font-size:14.5px;padding:8px 13px;border-radius:10px;background:var(--mist)}
+.check-h{font:500 12.5px/1 var(--f-mono);letter-spacing:.08em;color:var(--muted)}
+.checks{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:14px}
+.checks li{display:grid;grid-template-columns:26px 1fr;gap:10px;font-size:17px}
+.checks li::before{content:"";width:20px;height:20px;margin-top:3px;border-radius:6px;border:2px solid var(--accent);background:var(--accent-soft)}
+@media (max-width:760px){.field{grid-template-columns:1fr;padding:26px}}
+
+/* 후기 */
+.voices{padding-block:110px}
+.qgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:48px}
+.q{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:32px;display:grid;gap:22px;align-content:space-between}
+.q blockquote{margin:0;font-size:18px;line-height:1.75;font-weight:500}
+.q .who{display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--muted);font-size:14.5px}
+@media (max-width:900px){.qgrid{grid-template-columns:1fr}}
+
+/* 마지막 CTA (어두운 띠) */
+.final{text-align:center;padding-block:130px;background:radial-gradient(80% 90% at 50% 120%,rgba(140,162,255,.55),transparent 65%),linear-gradient(135deg,#2B4FD8,#3D5FE6);color:#fff}
+.final .btn.blue{background:transparent;border-color:rgba(255,255,255,.75);color:#fff}
+.final .btn.white{border-color:#fff}
+.final h2{font-size:clamp(32px,5vw,60px);font-weight:900;line-height:1.25}
+.final .ctas{display:flex;justify-content:center;flex-wrap:wrap;gap:14px;margin-top:44px}
+.final .assure{margin-top:22px;color:#DCE3FF;font-size:16px}
+
+/* 푸터 */
+footer{background:var(--mist);padding-block:56px 140px;color:var(--muted);font-size:14.5px}
+footer .wrap{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:32px}
+footer h4{margin:0 0 12px;color:var(--ink);font-size:15px}
+footer ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+footer a{text-decoration:none}
+footer a:hover{color:var(--ink)}
+footer .legal{grid-column:1/-1;border-top:1px solid var(--line);padding-top:22px;font-size:13px}
+@media (max-width:720px){footer .wrap{grid-template-columns:1fr}}
+
+/* 떠 있는 버튼 */
+.dock{position:fixed;left:0;right:0;bottom:calc(22px + env(safe-area-inset-bottom,0px));z-index:45;display:flex;justify-content:center;pointer-events:none;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.pillcta{pointer-events:auto;display:inline-flex;align-items:center;gap:22px;height:74px;padding:0 12px 0 36px;border-radius:999px;background:linear-gradient(90deg,var(--pill-a),var(--pill-b));color:var(--ink);text-decoration:none;font:800 21px/1 var(--f-sans);box-shadow:0 18px 40px -12px rgba(20,40,140,.35);border:1px solid rgba(255,255,255,.6)}
+.pillcta .arr{width:52px;height:52px;border-radius:50%;background:#111318;color:#fff;display:grid;place-items:center}
+.pillcta .arr svg{width:22px;height:22px}
+.help{position:fixed;right:calc(24px + env(safe-area-inset-right,0px));bottom:calc(22px + env(safe-area-inset-bottom,0px));z-index:46;display:flex;flex-direction:column;align-items:flex-end;gap:12px}
+.help-btn{width:72px;height:72px;border-radius:22px;border:0;background:#2A3044;color:#fff;cursor:pointer;display:grid;place-items:center;box-shadow:0 14px 30px -10px rgba(0,0,0,.45)}
+.help-btn svg{width:38px;height:38px}
+.help-card{background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 40px -16px rgba(0,0,0,.35);padding:18px;width:min(290px,calc(100vw - 48px));display:grid;gap:10px;font-size:15px}
+.help-card .mail{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--mist);border-radius:10px;padding:10px 12px;font-family:var(--f-mono);font-size:13.5px}
+.help-card button{border:0;background:none;color:var(--accent);font:700 14px var(--f-sans);cursor:pointer}
+@media (max-width:640px){
+  .pillcta{height:60px;font-size:17px;padding-left:24px;gap:14px}.pillcta .arr{width:42px;height:42px}
+  .help-btn{width:58px;height:58px;border-radius:18px}.help-btn svg{width:30px;height:30px}
+  .dock{justify-content:flex-start}
+}
+.preview-note{background:var(--warn-soft);color:var(--warn);font-size:13.5px;text-align:center;padding-block:9px}
+
+/* 흰 칸·검정 칸 번갈아: 검정 칸은 같은 이름의 색 토큰을 어두운 값으로 바꿔 끼운다 */
+.dark{--paper:#07080C;--mist:#0E1016;--card:#14161E;--ink:#F3F4F8;--muted:#A0A5B4;--faint:#3A3E4B;--line:#252836;
+  --accent:#5B7BFF;--accent-hi:#8CA2FF;--accent-soft:#1B2450;--ok:#4CC38A;--ok-soft:#163226;--warn:#E3A645;--warn-soft:#3A2C12;
+  color-scheme:dark;color:var(--ink);
+  background:radial-gradient(60% 50% at 100% 100%,rgba(43,79,216,.28),transparent 65%),var(--paper)}
+.stats.dark{background:radial-gradient(60% 60% at 50% 120%,rgba(43,79,216,.35),transparent 65%),#000}
+/* 장점·신뢰 칸은 흰 칸으로 */
+.night{background:var(--paper);color:var(--ink)}
+.night h2 em{color:var(--accent)}
+.night .lead,.point p{color:var(--muted)}
+.point h3{color:var(--ink)}
+.point h3 svg{color:var(--accent)}
+.dcard{background:var(--card);border:1px solid var(--line)}
+.dcard .ic{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 25%,transparent);color:var(--accent)}
+.dcard p{color:var(--muted)}
+.dcard .fine{color:var(--muted)}
+.dcard a{color:var(--ink)}
+/* 마지막 안내도 흰 칸 */
+.final{background:radial-gradient(70% 80% at 50% 120%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 65%),var(--paper);color:var(--ink)}
+.final .btn.white{border-color:var(--line)}
+.final .btn.blue{background:var(--accent);border-color:var(--accent);color:#fff}
+.final .assure{color:var(--muted)}
+footer{background:#000;color:#A0A5B4;--ink:#F3F4F8;--line:#252836;--accent:#5B7BFF}
+footer .logo{color:#F3F4F8}
+
+/* 창작 분야 흐르는 바 */
+.lead-l{margin-top:16px;font-size:18px;color:var(--muted)}
+.fbars{display:grid;gap:16px;margin-top:48px;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+.fbar{overflow:hidden}
+.ftrack{display:flex;gap:16px;width:max-content;animation:slide 48s linear infinite}
+.fbar.rev .ftrack{animation-direction:reverse;animation-duration:56s}
+.fbars:hover .ftrack{animation-play-state:paused}
+.ftrack{gap:56px}
+.fitem{display:grid;gap:6px;padding:8px 0}
+.fitem .fk{font:500 12.5px/1 var(--f-mono);color:var(--accent);letter-spacing:.04em}
+.fitem b{font-size:22px;font-weight:800;letter-spacing:-.02em;white-space:nowrap}
+.fitem .fc{font-size:14.5px;color:var(--muted);white-space:nowrap}
+</style>
+
+</head>
+<body>
+<div class="preview-note"><div class="wrap">예비 화면(시안)이에요. 이름·금액·후기는 예시이고, 버튼은 시연판(demo.thecov.kr)으로 연결돼요.</div></div>
+
+<!-- GNB -->
+<header class="gnb">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="CoV 처음으로">
+      <svg viewBox="9.9 -1.1 400 400" aria-hidden="true"><g fill="currentColor"><path d="M265.22 85.17A120.00 120.00 0 1 0 308.71 272.09L289.38 233.96A82.00 83.90 0 1 1 246.67 116.83Z"/><path d="M237.05 251.73L333.27 87.47L290.99 87.47L220.73 207.40L199.95 166.38L159.06 166.38L203.37 253.86A58.60 60.50 0 0 0 237.05 251.73Z"/></g></svg>CoV
+    </a>
+    <div class="gnb-right">
+      <a class="login" href="https://thecov.kr" target="_blank" rel="noopener">로그인</a>
+      <button class="burger" id="burger" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="drawer">
+        <svg viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M3 7h24M3 15h24M3 23h24"/></svg>
+      </button>
+    </div>
+  </div>
+  <nav class="drawer" id="drawer" hidden>
+    <div class="wrap"><ul>
+      <li><a href="#why">서비스 소개</a></li>
+      <li><a href="#flow">이용 방법</a></li>
+      <li><a href="#fields">창작 분야</a></li>
+      <li><a href="#trust">안전한 계약</a></li>
+      <li><a href="#footer">고객지원</a></li>
+    </ul></div>
+  </nav>
+</header>
+
+<main id="top">
+<!-- 히어로 -->
+<section class="hero">
+  <div class="wrap">
+    <div class="kicker"><span>창작 외주가 필요한 모든 곳에</span><span class="dash" aria-hidden="true"></span><span class="roll" id="roll" aria-live="polite"><span>영상</span></span></div>
+    <h1><span class="h1-lead">계약부터 정산까지</span><br><em class="cov-name" aria-label="Connection Of Values">C<small>onnection</small> O<small>f</small> V<small>alues</small></em></h1>
+    <p class="sub">크리에이터와 클라이언트가 조건을 맞추고 안전하게 계약하는 곳</p>
+    <div class="ctas">
+      <a class="btn white" href="https://demo.thecov.kr" target="_blank" rel="noopener">크리에이터로 시작하기</a>
+      <a class="btn blue" href="https://demo.thecov.kr" target="_blank" rel="noopener">의뢰하기</a>
+    </div>
+  </div>
+</section>
+
+<!-- 분야 흐르는 띠 -->
+<div class="strip" aria-hidden="true">
+  <div class="marquee" id="marquee"></div>
+</div>
+
+<!-- 숫자 -->
+<section class="stats dark">
+  <div class="wrap">
+    <h2 class="center-h">“말로 한 약속”에서<br>“기록으로 남는 계약”으로</h2>
+    <div class="center-cta"><a class="btn ink" href="#flow">이용 방법 보러가기 →</a></div>
+  </div>
+</section>
+
+<!-- 검정 띠: 왜 CoV -->
+<section class="night" id="why">
+  <div class="wrap">
+    <h2>작업은 <em>창작에만</em><br>분쟁은 줄입니다</h2>
+    <p class="lead">조건, 수정 요청, 입금 확인을 메신저 대신 한 화면에서 처리해요.</p>
+    <div class="points">
+      <div class="point">
+        <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>수정이 몇 번째인지 다투지 않아요</h3>
+        <p>수정 요청 한 번에 한 회씩 줄고, 남은 횟수를 두 사람이 똑같이 봐요.</p>
+      </div>
+      <div class="point">
+        <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="m8 9 2 2 4-4M8 15h8"/></svg>조건은 체크박스로 1분 안에</h3>
+        <p>금액, 납기, 수정 횟수, 납품 형식을 골라 담으면 그대로 계약 조건이 돼요.</p>
+      </div>
+    </div>
+
+    <div class="dcards" id="trust">
+      <div class="dcard">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+        <h3>고칠 수 없는 동의 기록</h3>
+        <p>누가, 언제, 어떤 조건에 동의했는지 저장하고 수정·삭제를 막아요. 진행 이력도 같은 방식으로 남아요.</p>
+        <span class="fine">이 기록의 법적 효력 범위는 법률 검토 후 안내할 예정이에요.</span>
+        <a href="#flow">자세히 보기 →</a>
+      </div>
+      <div class="dcard">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6l-8-3z"/><path d="m9 12 2 2 4-4"/></svg></div>
+        <h3>대금은 사람이 두 번 확인</h3>
+        <p>CoV는 대금을 보관하지 않아요. 입금 확인과 지급 처리는 서로 다른 운영자가 맡아요.</p>
+        <span class="fine">대금 경로는 거래마다 '운영자 수령' 또는 '직접 송금' 중에서 정해요.</span>
+        <a href="#flow">자세히 보기 →</a>
+      </div>
+      <div class="dcard">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h10M4 17h7"/><circle cx="17.5" cy="16.5" r="3"/><path d="m20 19 2 2"/></svg></div>
+        <h3>내 사본이 원본과 같은지 대조</h3>
+        <p>동의한 조건으로 만든 해시값으로, 갖고 있는 계약 사본이 CoV 기록과 맞는지 언제든 확인해요.</p>
+        <span class="fine">해시값: 조건 내용을 짧은 지문으로 바꾼 값. 한 글자만 달라도 값이 달라져요.</span>
+        <a href="#flow">자세히 보기 →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 흐름 아코디언 -->
+<section class="flow dark" id="flow">
+  <div class="wrap">
+    <h2 class="big-h">조건 입력-동의-입금 확인-정산<br>전 과정을 하나로 연결해요</h2>
+    <div class="acc" id="acc"></div>
+  </div>
+</section>
+
+<!-- 창작 분야 -->
+<section class="fields" id="fields">
+  <div class="wrap">
+    <h2 class="big-h">분야마다 꼭 정해야 할<br>조건이 달라요</h2>
+    <p class="lead-l">작업마다 계약 전에 꼭 정해야 할 조건을 함께 보여 드려요.</p>
+  </div>
+  <div class="fbars">
+    <div class="fbar"><div class="ftrack" id="fbar1"></div></div>
+    <div class="fbar rev"><div class="ftrack" id="fbar2"></div></div>
+  </div>
+  <div>
+  </div>
+</section>
+
+<!-- 후기 -->
+<section class="voices dark">
+  <div class="wrap">
+    <h2 class="big-h">이런 상황에서 CoV를 써요 <span class="tag-ex">예시</span></h2>
+    <div class="qgrid">
+      <div class="q"><blockquote>"수정이 몇 번째인지 매번 메신저를 거슬러 올라가 셌는데, 이제 남은 횟수가 화면에 바로 보여요."</blockquote><div class="who"><span>일러스트레이터 · 표지 작업</span><span class="tag-ex">예시</span></div></div>
+      <div class="q"><blockquote>"처음 맡기는 작업자라 불안했는데, 동의한 조건이 잠겨 있어서 금액이 바뀔 걱정이 없었어요."</blockquote><div class="who"><span>소상공인 · 홍보 영상 의뢰</span><span class="tag-ex">예시</span></div></div>
+      <div class="q"><blockquote>"검수 답이 늦어도 이틀 뒤 자동 승인돼서 정산이 몇 주씩 밀리지 않았어요."</blockquote><div class="who"><span>작곡가 · 광고 음악</span><span class="tag-ex">예시</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 마지막 CTA -->
+<section class="final">
+  <div class="wrap">
+    <h2>다음 작업은<br>조건부터 맞추고 시작하세요</h2>
+    <div class="ctas">
+      <a class="btn white" href="https://demo.thecov.kr" target="_blank" rel="noopener">크리에이터로 시작하기</a>
+      <a class="btn blue" href="https://demo.thecov.kr" target="_blank" rel="noopener">의뢰하기</a>
+    </div>
+    <p class="assure">시범 운영 기간 수수료 없음 · 이메일이나 구글 계정으로 가입</p>
+  </div>
+</section>
+</main>
+
+<footer id="footer">
+  <div class="wrap">
+    <div>
+      <a class="logo" href="#top"><svg viewBox="9.9 -1.1 400 400" aria-hidden="true"><g fill="currentColor"><path d="M265.22 85.17A120.00 120.00 0 1 0 308.71 272.09L289.38 233.96A82.00 83.90 0 1 1 246.67 116.83Z"/><path d="M237.05 251.73L333.27 87.47L290.99 87.47L220.73 207.40L199.95 166.38L159.06 166.38L203.37 253.86A58.60 60.50 0 0 0 237.05 251.73Z"/></g></svg>CoV</a>
+      <p style="margin-top:14px;max-width:36ch">Connection of Values. 음악·디자인·영상 외주의 계약부터 정산까지.</p>
+    </div>
+    <div><h4>서비스</h4><ul><li><a href="#flow">이용 방법</a></li><li><a href="#fields">창작 분야</a></li><li><a href="https://demo.thecov.kr" target="_blank" rel="noopener">체험하기</a></li></ul></div>
+    <div><h4>고객지원</h4><ul><li>문의 <span class="mono">info@thecov.kr</span></li><li><a href="https://thecov.kr/terms" target="_blank" rel="noopener">이용약관</a></li><li><a href="https://thecov.kr/privacy" target="_blank" rel="noopener"><b>개인정보처리방침</b></a></li></ul></div>
+    <div class="legal">© 2026 CoV. 사업자 정보는 등록 후 표시돼요. CoV는 거래 대금을 보관하지 않아요.</div>
+  </div>
+</footer>
+
+<!-- 떠 있는 버튼 -->
+<div class="dock">
+  <a class="pillcta" href="https://demo.thecov.kr" target="_blank" rel="noopener">가입 없이 체험하기<span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+</div>
+<div class="help">
+  <div class="help-card" id="helpCard" hidden>
+    <strong>문의하기</strong>
+    <span style="color:var(--muted)">메일로 보내 주시면 영업일 기준 1일 안에 답해요.</span>
+    <div class="mail"><span id="mailAddr">info@thecov.kr</span><button type="button" id="copyMail">복사</button></div>
+  </div>
+  <button class="help-btn" id="helpBtn" type="button" aria-label="문의하기" aria-expanded="false" aria-controls="helpCard">
+    <svg viewBox="0 0 40 40" fill="none"><path d="M20 4C11 4 4 10.6 4 18.6c0 4.5 2.2 8.5 5.7 11.2L8 36l7.2-3.6c1.5.4 3.1.6 4.8.6 9 0 16-6.5 16-14.4S29 4 20 4z" fill="#fff"/><path d="M16 15.5a4 4 0 1 1 5.6 3.7c-1 .5-1.6 1.2-1.6 2.3v.8" stroke="#2A3044" stroke-width="2.6" stroke-linecap="round"/><circle cx="20" cy="26.5" r="1.7" fill="#2A3044"/></svg>
+  </button>
+</div>
+
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // 메뉴
+  const burger=document.getElementById('burger'), drawer=document.getElementById('drawer');
+  burger.addEventListener('click',()=>{drawer.hidden=!drawer.hidden;burger.setAttribute('aria-expanded',!drawer.hidden);});
+  drawer.addEventListener('click',e=>{if(e.target.tagName==='A'){drawer.hidden=true;burger.setAttribute('aria-expanded','false');}});
+
+  // 롤링 키워드
+  const words=['영상','디자인','일러스트','음악'], roll=document.getElementById('roll'); let wi=0;
+  if(!reduce) setInterval(()=>{wi=(wi+1)%words.length;roll.innerHTML='<span>'+words[wi]+'</span>';},2200);
+
+  // 분야 띠
+  const kinds=['<b>영상</b> 편집','<b>로고</b> 디자인','<b>표지</b> 일러스트','<b>광고</b> 음악','<b>상세페이지</b>','<b>번역</b>','<b>제품</b> 사진','<b>모션</b>그래픽'];
+  const mq=document.getElementById('marquee');
+  mq.innerHTML=[...kinds,...kinds].map(k=>'<span>'+k+'</span>').join('');
+
+  // 흐름 아코디언
+  const head=(pill,cls)=>`<div class="sheet-h"><span class="no">거래 #2611-0042 · 예시</span><span class="pill ${cls}">${pill}</span></div>`;
+  const steps=[
+    {t:'의뢰·조건 입력', d:'작업 내용, 금액, 납기, 수정 횟수를 체크박스로 골라 제안해요. 상대방 이메일이나 공개 크리에이터 계정으로 보내고, 동의 전에는 고치거나 철회할 수 있어요.',
+     m:`<div class="sheet">${head('제안 작성 중','blue')}<div class="sheet-b"><div class="opts">
+        <div class="opt on"><i></i><span>원본 프로젝트 파일 제공</span><span></span></div>
+        <div class="opt on"><i></i><span>자막 포함</span><span></span></div>
+        <div class="opt"><i></i><span>배경음악 구매 대행</span><span></span></div>
+        <div class="opt on"><i></i><span>수정 횟수</span><span>3회</span></div></div></div></div>
+       <div class="sheet">${head('조건 요약','blue')}<div class="sheet-b">
+        <div class="row"><span>작업</span><span>브랜드 홍보 영상 60초</span></div>
+        <div class="row"><span>작업 금액</span><span>800,000원</span></div>
+        <div class="row"><span>최종 납기</span><span>12월 12일 (금)</span></div>
+        <div class="row"><span>초과 수정 단가</span><span>회당 50,000원</span></div>
+        <div class="btns"><span>임시 저장</span><span class="p">제안 보내기</span></div></div></div>`},
+    {t:'조건 확인·동의', d:'상대가 조건을 읽고 동의하면, 그 순간의 조건이 잠기고 해시값과 함께 기록돼요. 동의한 뒤에는 누구도 조건을 고칠 수 없어요.',
+     m:`<div class="sheet">${head('동의 기록','green')}<div class="sheet-b"><ul class="tl">
+        <li><time>11/28 14:02</time><span>의뢰인이 조건을 제안</span></li>
+        <li><time>11/28 18:40</time><span>작업자가 조건을 확인하고 동의</span></li></ul></div></div>
+       <div class="sheet">${head('양측 동의 완료','green')}<div class="sheet-b">
+        <div class="row"><span>의뢰인</span><span>로컬카페 브루잉랩</span></div>
+        <div class="row"><span>작업자</span><span>편집자 한서윤</span></div>
+        <div class="hash"><code>조건 해시 9f2c71e4b0a8d35e…c41a</code><b>🔒 잠김</b></div></div></div>`},
+    {t:'입금 확인·작업', d:'의뢰인이 입금을 신고하면 운영자가 직접 확인한 뒤 작업 단계로 넘어가요. CoV는 대금을 보관하지 않아요.',
+     m:`<div class="sheet">${head('입금 확인','blue')}<div class="sheet-b"><ul class="tl">
+        <li><time>11/29 10:15</time><span>의뢰인 입금 신고</span></li>
+        <li><time>11/29 13:30</time><span>운영자 입금 확인</span></li></ul></div></div>
+       <div class="sheet">${head('작업 중','blue')}<div class="sheet-b">
+        <div class="row"><span>대금 경로</span><span>운영자 수령</span></div>
+        <div class="row"><span>최종 납기까지</span><span class="mono">D-13</span></div>
+        <div class="row"><span>남은 수정</span><span><span class="meter"><i class="on"></i><i class="on"></i><i class="on"></i></span></span></div></div></div>`},
+    {t:'납품·검수·정산', d:'납품물을 검수해 승인하면 작업자에게 지급되고 정산이 끝나요. 수정을 요청하면 회차가 1회 줄고, 2일 동안 답이 없으면 자동 승인돼요.',
+     m:`<div class="sheet">${head('납품','amber')}<div class="sheet-b">
+        <div class="row"><span>파일</span><span>brewinglab_60s_v2.mp4</span></div>
+        <div class="row"><span>수정 회차</span><span><span class="meter"><i class="on"></i><i class="on"></i><i></i></span></span></div></div></div>
+       <div class="sheet">${head('검수 대기','amber')}<div class="sheet-b">
+        <div class="row"><span>자동 승인까지</span><span class="mono">1일 22시간</span></div>
+        <div class="row"><span>승인 후</span><span>운영자 지급 → 정산 완료</span></div>
+        <div class="btns"><span>수정 요청</span><span class="p">검수 승인</span></div></div></div>`}
+  ];
+  const acc=document.getElementById('acc');
+  steps.forEach((s,i)=>{
+    const it=document.createElement('div'); it.className='acc-item';
+    it.innerHTML=`<h3><button class="acc-btn" type="button" id="ab${i}" aria-expanded="false" aria-controls="ap${i}"><span class="n">0${i+1}</span>${s.t}</button></h3>
+      <div class="acc-body" id="ap${i}" role="region" aria-labelledby="ab${i}" hidden><div class="mock">${s.m}</div><p>${s.d}</p><a class="go" href="https://demo.thecov.kr" target="_blank" rel="noopener">체험해 보기 →</a></div>`;
+    acc.appendChild(it);
+  });
+  const items=[...acc.children];
+  function openAcc(i){items.forEach((it,j)=>{const on=j===i;it.classList.toggle('open',on);it.querySelector('.acc-btn').setAttribute('aria-expanded',on);it.querySelector('.acc-body').hidden=!on;});}
+  items.forEach((it,i)=>it.querySelector('.acc-btn').addEventListener('click',()=>openAcc(i)));
+  openAcc(0);
+
+  // 분야 탭
+  const fields=[
+    {k:'영상',d:'편집 길이와 원본 소스 제공 범위에서 다툼이 가장 많아요.',c:['유튜브 편집','광고·홍보 영상','모션그래픽','숏폼'],l:['완성본 길이와 해상도','원본 프로젝트 파일 제공 여부','배경음악·폰트 저작권 처리','자막 포함 여부']},
+    {k:'디자인',d:'시안 개수와 수정 범위를 처음에 정해 두면 끝이 보여요.',c:['로고·BI','상세페이지','패키지','포스터·배너'],l:['초안 시안 개수','수정 횟수와 초과 단가','원본 파일(AI·PSD) 제공 여부','사용 범위(온라인·인쇄)']},
+    {k:'일러스트',d:'쓰는 곳과 기간에 따라 저작권 조건이 크게 달라져요.',c:['표지','캐릭터','웹툰 배경','굿즈용'],l:['상업적 이용 범위','러프·채색 단계별 검수','작가 포트폴리오 게재 허용','납품 해상도와 형식']},
+    {k:'음악',d:'편곡·믹싱 포함 여부와 권리 귀속을 분명히 해야 해요.',c:['작곡','편곡','믹싱·마스터링','광고 음악'],l:['곡 길이와 버전 수','스템(트랙별 파일) 제공 여부','저작권·저작인접권 귀속','사용 매체와 기간']},
+    {k:'글·번역',d:'분량 기준(글자·단어)과 감수 횟수를 숫자로 정해요.',c:['카피라이팅','번역','원고 대필','교정·교열'],l:['분량 기준과 단가','감수·수정 횟수','용어집 제공 여부','외부 공개 시 이름 표기']},
+    {k:'사진',d:'촬영 컷 수와 보정 컷 수를 나눠 정하는 게 좋아요.',c:['제품 촬영','프로필','행사 스케치','공간 촬영'],l:['촬영 시간과 장소','전체 컷과 보정 컷 수','원본(RAW) 제공 여부','초상권·상업 이용 동의']}
+  ];
+  const works=[
+    ['영상','영상 편집','완성본 길이와 해상도'],['디자인','상세페이지','시안 개수와 수정 범위'],['음악','광고 음악','사용 매체와 기간'],
+    ['글·번역','번역','분량 기준과 단가'],['사진','제품 사진','보정 컷 수와 원본 제공'],['영상','모션그래픽','소스 파일 제공 여부'],
+    ['일러스트','표지 일러스트','상업적 이용 범위'],['디자인','로고·BI','원본 파일(AI) 제공'],['음악','믹싱·마스터링','스템 파일 제공 여부'],
+    ['영상','숏폼 편집','편수와 납품 주기'],['글·번역','카피라이팅','감수·수정 횟수'],['사진','프로필 촬영','촬영 시간과 장소'],
+    ['일러스트','캐릭터 디자인','굿즈 사용 허용'],['디자인','포스터·배너','사용 범위(온라인·인쇄)']
+  ];
+  const card=w=>`<div class="fitem"><span class="fk">${w[0]}</span><b>${w[1]}</b><span class="fc">✓ ${w[2]}</span></div>`;
+  const half=Math.ceil(works.length/2), r1=works.slice(0,half), r2=works.slice(half);
+  document.getElementById('fbar1').innerHTML=[...r1,...r1].map(card).join('');
+  document.getElementById('fbar2').innerHTML=[...r2,...r2].map(card).join('');
+
+  // 문의
+  const hb=document.getElementById('helpBtn'), hc=document.getElementById('helpCard');
+  hb.addEventListener('click',()=>{hc.hidden=!hc.hidden;hb.setAttribute('aria-expanded',!hc.hidden);});
+  document.getElementById('copyMail').addEventListener('click',e=>{const btn=e.currentTarget;
+    navigator.clipboard.writeText('info@thecov.kr').then(()=>{btn.textContent='복사됨';},()=>{const r=document.createRange();r.selectNodeContents(document.getElementById('mailAddr'));const s=getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='선택됨';});});
+})();
+</script>
+
+</body>
+</html>
